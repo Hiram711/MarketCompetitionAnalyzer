@@ -72,8 +72,8 @@
             sortorder: "asc",
             viewrecords: true,
             caption: "用户表",
-            editurl: "{{url_for('auth.edit_user')}}",
-            url: "{{url_for('auth.list_user')}}",
+            editurl: "{{url_for('sysmanage.edit_user')}}",
+            url: "{{url_for('sysmanage.list_user')}}",
             datatype: "json",
             mtype: 'GET',
             colModel:
@@ -89,7 +89,7 @@
                         sortable: false,
                         editable: true,
                         edittype: 'select',
-                        editoptions: {dataUrl: "{{url_for('auth.list_role')}}"},
+                        editoptions: {dataUrl: "{{url_for('sysmanage.list_role')}}"},
                         search: true
                     },
                     {

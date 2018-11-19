@@ -7,10 +7,10 @@ import os
 import click
 from flask import Flask
 
-from .apis.v1 import api_v1
 from .blueprints.auth import auth_bp
 from .blueprints.main import main_bp
 from .blueprints.scheduler import scheduler_bp
+from .blueprints.sysmanage import sysmanage_bp
 from .config import config
 from .extensions.csrf_protect import csrf
 from .extensions.flaskapscheduler import scheduler
@@ -48,9 +48,9 @@ def register_extensions(app):
 
 def register_blueprints(app):
     app.register_blueprint(main_bp)
+    app.register_blueprint(sysmanage_bp, url_prefix='/config')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(scheduler_bp, url_prefix='/scheduler')
-    app.register_blueprint(api_v1, url_prefix='/api/v1')
 
 
 def register_shell_context(app):
