@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}市场竞争分析系统{% endblock %}</title>
+    {% block styles %}
+    <link rel="shortcut icon" href="{{url_for('static',filename='image/favicon.ico')}}"/>
+    <link rel="bookmark" href="{{url_for('static',filename='image/favicon.ico')}}"/>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+    {% endblock %}
+    {% endblock %}
+</head>
+
+<body>
+{% include 'base/navbar.html' %}
+<main role="main" class="container-fluid">
+    {% block content %}{% endblock %}
+</main>
+<footer class="footer">
+    <div class="container-fluid ">
+        <center>
+              <span class="text-muted ">&copy; Copyright 2018 By <a href="http://www.luckyair.net/">Lucky Air</a>
+              </span>
+        </center>
+    </div>
+</footer>
+{% block scripts %}
+<script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+{% endblock %}
+</body>
+</html>
