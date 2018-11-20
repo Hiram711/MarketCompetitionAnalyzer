@@ -1,0 +1,117 @@
+{% extends "base/layout.html" %}
+{% block styles %}
+{{super()}}
+<link href="https://cdn.bootcss.com/octicons/4.4.0/font/octicons.css" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='css/jqgrid/ui.jqgrid-bootstrap4.css')}}">
+{% endblock %}
+{% block content %}
+<div class="col-md-4 offset-md-4">
+    {% include 'base/msg.html' %}
+</div>
+<div style="margin-top: 5%;" class="col-md-10 offset-md-1">
+    <div id="mysearch"></div>
+    <table id="grid"></table>
+    <div id="gridpager"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='js/jquery-ui/jquery-ui.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/jquery.jqGrid.min.js')}}"></script>
+<script>
+    $(document).ready(function () {
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader('X-CSRFToken', "{{ csrf_token() }}");
+                }
+            }
+        });
+
+        var default_error_message = "Oops, something was wrong!";
+        $(document).ajaxError(function (event, request) {
+            var message = null;
+
+            if (request.responseJSON && request.responseJSON.hasOwnProperty('message')) {
+                message = request.responseJSON.message;
+            } else if (request.responseText) {
+                var IS_JSON = true;
+                try {
+                    var data = JSON.parse(request.responseText);
+                }
+                catch (err) {
+                    IS_JSON = false;
+                }
+
+                if (IS_JSON && data !== undefined && data.hasOwnProperty('message')) {
+                    message = JSON.parse(request.responseText).message;
+                } else {
+                    message = default_error_message;
+                }
+            } else {
+                message = default_error_message;
+            }
+            alert(message);
+        });
+
+        $("#grid").jqGrid({
+            styleUI: 'Bootstrap4',
+            iconSet: "Octicons",
+            responsive: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 10,
+            rowList: [10, 20, 30],
+            height: "100%",
+            //height: 300,
+            autowidth: true,
+            pager: '#gridpager',
+            sortname: 'id',
+            sortorder: "asc",
+            viewrecords: true,
+            caption: "用户表",
+            editurl: "{{url_for('sysmanage.edit_segment')}}",
+            url: "{{url_for('sysmanage.list_segment')}}",
+            datatype: "json",
+            mtype: 'GET',
+            colModel:
+                [
+                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', editable: false, search: false},
+                    {label: '起飞城市', name: 'dep_city', index: 'dep_city', align: 'center', editable: true, search: true},
+                    {label: '到达城市', name: 'arv_city', index: 'arv_city', align: 'center', editable: true, search: true},
+                    {
+                        label: '创建时间',
+                        name: 'create_time',
+                        index: 'create_time',
+                        align: 'center',
+                        editable: false,
+                        search: false
+                    },
+                    {
+                        label: '修改时间',
+                        name: 'modify_time',
+                        index: 'modify_time',
+                        align: 'center',
+                        editable: false,
+                        search: false
+                    },
+                    {label: '用户名', name: 'editor', index: 'editor', align: 'center', editable: false, search: false},
+                    {name: '操作', align: 'center', sortable: false, formatter: 'actions', search: false}
+                ],
+            jsonReader: {
+                root: "segments", // json中代表实际模型数据的入口
+                records: "total", // json中代表数据行总数的数据
+                page: "page", // json中代表当前页码的数据
+                total: "pages", // json中代表页码总数的数据
+                repeatitems: false
+            }
+        });
+        $("#grid").navGrid('#gridpager', {edit: false, add: true, del: false}, {}, {}, {}, {
+            sopt: ['eq'],
+            multipleSearch: true
+        });
+    });
+</script>
+{% endblock %}

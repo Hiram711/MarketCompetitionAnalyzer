@@ -46,6 +46,12 @@ class Segment(db.Model):
     prices = db.relationship('Price', backref='segment', lazy='dynamic')
     prices_details = db.relationship('PriceDetail', backref='segment', lazy='dynamic')
 
+    def to_json(self):
+        return {'id': self.id, 'dep_city': self.dep_city, 'arv_city': self.arv_city,
+                'create_time': self.create_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'modify_time': self.modify_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'editor': self.editor.username}
+
 
 # we specify this special model because every company according to the situation will have some special price plans
 class PriceDetail(db.Model):
