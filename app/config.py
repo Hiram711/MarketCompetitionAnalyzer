@@ -7,6 +7,8 @@ import sys
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
+from app.crawlers.tasks import task_MU
+
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 # SQLite URI compatible
@@ -25,9 +27,18 @@ class BaseConfig:
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or r'san.zhang'
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or '123456'
+
     SECRET_KEY = os.getenv('SECRET_KEY', 'a default secret string')
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+
+    CRAWLER_COMPANY = {'东方航空': 'MU',  # set companies
+                       '祥鹏航空': '8L',
+                       '昆明航空': 'KY'}
+    CRAWLER_FUNCS = {'MU': task_MU}  # set different func for different company
+    CRAWLER_DAYS = 7  # set how many days after current date the crawler will search for
+
     JOBS = []
     SCHEDULER_EXECUTORS = {
         'default': {'type': 'threadpool', 'max_workers': 40}

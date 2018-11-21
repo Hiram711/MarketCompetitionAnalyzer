@@ -4,6 +4,8 @@ __author__ = 'Hiram Zhang'
 
 from datetime import datetime
 
+from flask import current_app
+
 from app.extensions.flasksqlalchemy import db
 
 
@@ -32,6 +34,29 @@ class Company(db.Model):
     run_logs = db.relationship('CrawlerLog', backref='company', lazy='dynamic')
     prices = db.relationship('Price', backref='company', lazy='dynamic')
     prices_details = db.relationship('PriceDetail', backref='company', lazy='dynamic')
+
+    def to_json(self):
+        return {'id': self.id, 'company_name': self.company_name, 'prefix': self.prefix,
+                'is_avaliable': self.is_avaliable,
+                'create_time': self.create_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'modify_time': self.modify_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'editor': self.editor.username}
+
+    @property
+    def crawler_func(self):
+        return current_app.config['CRAWLER_FUNCS'].get(self.prefix)
+
+    @staticmethod
+    def insert_companies():
+        companies = current_app.config['CRAWLER_COMPANY']
+        for r in companies:
+            company = Company.query.filter_by(company_name=r).first()
+            if company is None:
+                company = Company(company_name=r)
+            company.prefix = companies[r]
+            company.editor_id = 1
+            db.session.add(company)
+        db.session.commit()
 
 
 class Segment(db.Model):
@@ -102,3 +127,16 @@ class Price(db.Model):
     price1 = db.Column(db.Integer)
     price2 = db.Column(db.Integer)
     price3 = db.Column(db.Integer)
+
+
+# use this model to save the user config about crawler running interval
+class Interval(db.Model):
+    __tablename__ = 'intervals'
+    id = db.Column(db.Integer, primary_key=True)
+    value = db.Column(db.Integer, default=2)
+
+    @staticmethod
+    def insert_interval():
+        i = Interval()
+        db.session.add(i)
+        db.session.commit()

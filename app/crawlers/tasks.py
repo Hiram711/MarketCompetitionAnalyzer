@@ -75,7 +75,7 @@ def task_MU(db_url, add_days=7):
                             dt.price_type1 = subrow[0]
                             dt.price_type2 = subrow[1]
                             if re_discount.match(subrow[2]):
-                                dt.discount = (1.0 * re_price.findall(re_discount.findall(subrow[2])[0].strip())[
+                                dt.discount = float(re_price.findall(re_discount.findall(subrow[2])[0].strip())[
                                     0]) / 10
                                 dt.price = int(re.sub(r',{1}', '', re_price.findall(subrow[2])[1].strip()))
                             else:
