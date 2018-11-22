@@ -19,7 +19,8 @@ usage:
 '''
 
 
-def data_grabber_8l(dept, arv, flight_date, proxy=None, executable_path=r'D:\chromedriver_win32\chromedriver.exe',
+def data_grabber_8l(dept, arv, flight_date, proxy=None,
+                    executable_path=r'D:\chromedriver_win32\chromedriver.exe',
                     headless=True):
     # define the driver
     options = Options()
@@ -72,16 +73,36 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
             submit).click().perform()
 
         try:
-            WebDriverWait(driver, 20, 0.5).until(EC.presence_of_element_located((By.CLASS_NAME, 'pri')))
+            WebDriverWait(driver, 20, 0.5).until(EC.presence_of_element_located((By.ID, 'selectedFlights')))
         finally:
             print('New page''s elements Loaded.')
 
-        driver.execute_script("return getFlightB2C('2018-11-28');")
+        # driver.execute_script("return getFlightB2C('2018-11-28');")
+        # time.sleep(2)
+        # driver.save_screenshot('1.png')
 
     finally:
         soup = BeautifulSoup(driver.page_source, 'html5lib')
         driver.quit()  # make sure the webdriver closed after use
 
+    result = []
+    flight_list = soup.find(id='selectedFlights').select('.dis_in_div.m_t_15')
+
+    if '很抱歉，您所查询的航班暂无数据' in flight_list[0].get_text():
+        return result
+
+    for flight in flight_list:
+        dep_date = flight.attrs['deptime']
+        arv_date = flight.attrs['arrtime']
+        flt_no = flight.select('.divleft.dis_in_div.mr_30 .divleft .hb .f14')[1].get_text()
+        airplane_type = flight.select('.divleft.dis_in_div.mr_30 .divleft .jx .f14')[1].get_text()
+        dep_airport = flight.select('.divleft.clearfix .divleft.mt_8')[0].select_one('.f14').get_text()
+        flt_time = flight.select('.divleft.clearfix .divleft.mt_8')[1].select('.h22')[0].select_one(
+            '.f14.hour').get_text()
+        arv_airport = flight.select('.divleft.clearfix .divleft.mt_8')[2].select_one('.f14').get_text()
+        print(flt_no, airplane_type, dep_date, arv_date, flt_time, dep_airport, arv_airport)
+
 
 if __name__ == '__main__':
-    data_grabber_8l('昆明', '上海', '2018-11-22', headless=False)
+    rs = data_grabber_8l('昆明', '上海', '2018-11-23', headless=False)
+    print(rs)
