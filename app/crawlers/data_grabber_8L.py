@@ -99,10 +99,38 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
         dep_airport = flight.select('.divleft.clearfix .divleft.mt_8')[0].select_one('.f14').get_text()
         flt_time = flight.select('.divleft.clearfix .divleft.mt_8')[1].select('.h22')[0].select_one(
             '.f14.hour').get_text()
+        is_direct = True
+        transfer_city = ''
+        if len(flight.select('.divleft.clearfix .divleft.mt_8')[1].select('.h22')) > 1:
+            is_direct = False
+            transfer_city = flight.select('.divleft.clearfix .divleft.mt_8')[1].select('.h22')[1].select('.f14')[
+                1].get_text()
         arv_airport = flight.select('.divleft.clearfix .divleft.mt_8')[2].select_one('.f14').get_text()
-        print(flt_no, airplane_type, dep_date, arv_date, flt_time, dep_airport, arv_airport)
+        price_list = flight.select('.package.m_t_15 .hide .dis_in_div.content.top_line')
+        for price in price_list:
+            if price.parent.attrs['flg'] == 'packageone':
+                price_class1 = '公务舱'
+            elif price.parent.attrs['flg'] == 'packagetwo':
+                price_class1 = '标准经济舱'
+            elif price.parent.attrs['flg'] == 'packagethree':
+                price_class1 = '优惠经济舱'
+            else:
+                price_class1 = None
+            dep_city = price.attrs['depcity']
+            arv_city = price.attrs['arrcity']
+            price_class2 = price.select_one('.title').get_text()
+            price_value = price.attrs['zhe']
+            result.append(
+                dict(dep_city=dep_city, arv_city=arv_city, is_direct=is_direct, transfer_city=transfer_city,
+                     flt_no=flt_no, airplane_type=airplane_type,
+                     dep_date=dep_date, arv_date=arv_date, flt_time=flt_time,
+                     dep_airport=dep_airport, arv_airport=arv_airport, price_class1=price_class1,
+                     price_class2=price_class2, price_value=price_value))
+
+    return result
 
 
 if __name__ == '__main__':
-    rs = data_grabber_8l('昆明', '上海', '2018-11-23', headless=False)
-    print(rs)
+    rs = data_grabber_8l('昆明', '上海', '2018-12-01', headless=False)
+    for i in rs:
+        print(i)
