@@ -7,7 +7,7 @@ import sys
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
-from app.crawlers.tasks import task_MU
+from app.crawlers.tasks import task_MU, task_8L
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -36,7 +36,9 @@ class BaseConfig:
     CRAWLER_COMPANY = {'东方航空': 'MU',  # set companies
                        '祥鹏航空': '8L',
                        '昆明航空': 'KY'}
-    CRAWLER_FUNCS = {'MU': task_MU}  # set different func for different company
+    CRAWLER_FUNCS = {'MU': task_MU,
+                     '8L': task_8L
+                     }  # set different func for different company
     CRAWLER_DAYS = 7  # set how many days after current date the crawler will search for
 
     JOBS = []
