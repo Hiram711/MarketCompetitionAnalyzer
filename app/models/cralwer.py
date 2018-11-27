@@ -37,7 +37,7 @@ class Company(db.Model):
 
     def to_json(self):
         return {'id': self.id, 'company_name': self.company_name, 'prefix': self.prefix,
-                'is_avaliable': self.is_avaliable,
+                'is_avaliable': '启用' if self.is_avaliable else '禁用',
                 'create_time': self.create_time.strftime('%Y-%m-%d %H:%M:%S'),
                 'modify_time': self.modify_time.strftime('%Y-%m-%d %H:%M:%S'),
                 'editor': self.editor.username}

@@ -21,11 +21,6 @@ sysmanage_bp = Blueprint('sysmanage', __name__)
 def user_index():
     return render_template('sysmanage/user.html')
 
-@sysmanage_bp.route('/user/schedule')
-@login_required
-def scheduleManage():
-    return render_template('sysmanage/scheduleManage.html')
-
 
 # ajax
 @sysmanage_bp.route('/user/list')
@@ -169,3 +164,9 @@ def edit_segment():
         return jsonify(message='Segment changed.'), 200
     else:
         return jsonify(message='Invalid parameters..'), 400
+
+
+@sysmanage_bp.route('/config')
+@login_required
+def scheduleManage():
+    return render_template('sysmanage/config.html')

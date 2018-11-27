@@ -1,0 +1,395 @@
+{% extends "base/layout.html" %}
+{% block styles %}
+{{super()}}
+<link href="https://cdn.bootcss.com/octicons/4.4.0/font/octicons.css" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='css/jqgrid/ui.jqgrid-bootstrap4.css')}}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/css/bootstrap3/bootstrap-switch.min.css"
+      rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="col-md-4 offset-md-4">
+    {% include 'base/msg.html' %}
+</div>
+
+<div class="row">
+    <div class="col-sm-2 offset-md-1">
+        <label>定时开关:</label>
+        <input type="checkbox" class="schedule" id="schedule" checked/>
+    </div>
+    <div class="col-sm-2 offset-md-1">
+        <label>是否使用代理ip:</label>
+        <input type="checkbox" class="agent" id="agent" checked/>
+    </div>
+
+    <div class="col-sm-2 offset-md-1">
+        <label>邮件提醒:</label>
+        <input type="checkbox" class="mail" id="mail" checked/>
+    </div>
+</div>
+
+<HR>
+
+<div class="row">
+    <div class="col-sm-12 offset-md-1">
+        <label>抓取数据周期:</label>
+        <div id="time">
+            <label class="radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="1">每1小时</label>
+            <label class="radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="2">每2小时</label>
+            <label class="radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="4">每4小时</label>
+            <label class="radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="8">每8小时</label>
+            <label class="radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="24">每1天</label>
+            <label class="radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="168">每1周</label>
+            <label class="radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="720">每1月</label>
+        </div>
+    </div>
+</div>
+
+<HR>
+<div class="row">
+
+    <div class="col-sm-2 offset-md-1">
+        <label>最近一次抓取进度:</label>
+    </div>
+    <div class="col-sm-4 progress" style="padding: 0px">
+        <div class="progress-bar progress-bar-striped  progress-bar-animated bg-success" style="width:67%"></div>
+    </div>
+
+
+</div>
+
+<div class="row">
+    <div style="margin-top: 5%; float:right" class="col-md-10 offset-md-1">
+        <table id="company"></table>
+    </div>
+</div>
+
+<div class="row">
+    <div style="margin-top: 5%;" class="col-md-10 offset-md-1">
+        <div id="mysearch"></div>
+        <table id="grid"></table>
+        <div id="gridpager"></div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='js/jquery-ui/jquery-ui.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/jquery.jqGrid.min.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/js/bootstrap-switch.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+        findInterval();//获取抓取周期
+
+
+        $("#time :radio").click(function () { //变更抓取周期
+            var a = $("#time input[type=radio]:checked").val();
+            $.ajax({
+                url: "/scheduler/interval/reload",
+                data: {interval: a},
+                dataType: "json",
+                type: "POST",
+                success: function (res) {
+                    if (res != null && res != "") { // 注册成功
+                        alert(res.message);
+                    }
+                }, fail: function (err) {
+                    alert("error！");
+                }
+
+            });
+
+        });
+
+        $(".schedule").bootstrapSwitch({
+            onText: "开",      // 设置ON文本  
+            offText: "关",    // 设置OFF文本  
+            onColor: "success",// 设置ON文本颜色     (info/success/warning/danger/primary)  
+            offColor: "danger",  // 设置OFF文本颜色        (info/success/warning/danger/primary)  
+            size: "mini",    // 设置控件大小,从小到大  (mini/small/normal/large)  
+            handleWidth: "20",//设置控件宽度
+            onSwitchChange: function (event, state) {   // 当开关状态改变时触发  
+                var ProductId = event.target.defaultValue;
+                var hostname = location.hostname;
+                if (state == true) {
+
+                    $.ajax({
+                        url: "/scheduler/start",
+                        type: "POST",
+                        success: function (res) {
+
+                            if (res.status == "1") { // 注册成功
+
+                            } else { // 注册失败
+                                alert("开启失败！");
+                            }
+
+                        },
+                        fail: function (err) {
+                            alert("开启失败！");
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: "/scheduler/shutdown",
+                        type: "POST",
+                        success: function (res) {
+
+                            if (res.status == "0") { // 注册成功
+
+                            } else { // 注册失败
+                                alert("关闭失败！");
+                            }
+
+                        },
+                        fail: function (err) {
+                            alert("关闭失败！");
+                        }
+                    });
+                }
+            }
+        });
+
+        findStatus();//获取定时开关状态
+
+        $(".agent").bootstrapSwitch({
+            onText: "开",      // 设置ON文本  
+            offText: "关",    // 设置OFF文本  
+            onColor: "success",// 设置ON文本颜色     (info/success/warning/danger/primary)  
+            offColor: "danger",  // 设置OFF文本颜色        (info/success/warning/danger/primary)  
+            size: "mini",    // 设置控件大小,从小到大  (mini/small/normal/large)  
+            handleWidth: "20",//设置控件宽度
+            onSwitchChange: function (event, state) {   // 当开关状态改变时触发  
+                var ProductId = event.target.defaultValue;
+                if (state == true) {
+                    alert("ON");
+                } else {
+                    alert("OFF");
+                }
+            }
+        });
+
+        $(".mail").bootstrapSwitch({
+            onText: "开",      // 设置ON文本  
+            offText: "关",    // 设置OFF文本  
+            onColor: "success",// 设置ON文本颜色     (info/success/warning/danger/primary)  
+            offColor: "danger",  // 设置OFF文本颜色        (info/success/warning/danger/primary)  
+            size: "mini",    // 设置控件大小,从小到大  (mini/small/normal/large)  
+            handleWidth: "20",//设置控件宽度
+            onSwitchChange: function (event, state) {   // 当开关状态改变时触发  
+                var ProductId = event.target.defaultValue;
+                if (state == true) {
+                    alert("ON");
+                } else {
+                    alert("OFF");
+                }
+            }
+        });
+
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader('X-CSRFToken', "{{ csrf_token() }}");
+                }
+            }
+        });
+
+        var default_error_message = "Oops, something was wrong!";
+        $(document).ajaxError(function (event, request) {
+            var message = null;
+
+            if (request.responseJSON && request.responseJSON.hasOwnProperty('message')) {
+                message = request.responseJSON.message;
+            } else if (request.responseText) {
+                var IS_JSON = true;
+                try {
+                    var data = JSON.parse(request.responseText);
+                }
+                catch (err) {
+                    IS_JSON = false;
+                }
+
+                if (IS_JSON && data !== undefined && data.hasOwnProperty('message')) {
+                    message = JSON.parse(request.responseText).message;
+                } else {
+                    message = default_error_message;
+                }
+            } else {
+                message = default_error_message;
+            }
+            alert(message);
+        });
+
+        $("#grid").jqGrid({
+            styleUI: 'Bootstrap4',
+            iconSet: "Octicons",
+            responsive: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 10,
+            rowList: [10, 20, 30],
+            height: "100%",
+            //height: 300,
+            autowidth: true,
+            pager: '#gridpager',
+            sortname: 'id',
+            sortorder: "asc",
+            viewrecords: true,
+            caption: "用户表",
+            editurl: "{{url_for('sysmanage.edit_user')}}",
+            url: "{{url_for('sysmanage.list_user')}}",
+            datatype: "json",
+            mtype: 'GET',
+            colModel:
+                [
+                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', editable: false, search: false},
+                    {label: '邮箱', name: 'email', index: 'email', align: 'center', editable: true, search: true},
+                    {label: '用户名', name: 'username', index: 'username', align: 'center', editable: true, search: true},
+                    {
+                        label: '角色',
+                        name: 'role',
+                        index: 'role',
+                        align: 'center',
+                        sortable: false,
+                        editable: true,
+                        edittype: 'select',
+                        editoptions: {dataUrl: "{{url_for('sysmanage.list_role')}}"},
+                        search: true
+                    },
+                    {
+                        label: '创建时间',
+                        name: 'create_time',
+                        index: 'create_time',
+                        align: 'center',
+                        editable: false,
+                        search: false
+                    },
+                    {
+                        label: '修改时间',
+                        name: 'modify_time',
+                        index: 'modify_time',
+                        align: 'center',
+                        editable: false,
+                        search: false
+                    },
+                    {name: '操作', align: 'center', sortable: false, formatter: 'actions', search: false}
+                ],
+            jsonReader: {
+                root: "users", // json中代表实际模型数据的入口
+                records: "total", // json中代表数据行总数的数据
+                page: "page", // json中代表当前页码的数据
+                total: "pages", // json中代表页码总数的数据
+                repeatitems: false
+            }
+        });
+        $("#grid").navGrid('#gridpager', {edit: false, add: true, del: false}, {}, {}, {}, {sopt: ['eq']});
+
+
+        $("#company").jqGrid({
+            styleUI: 'Bootstrap4',
+            iconSet: "Octicons",
+            responsive: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            height: "50%",
+            //height: 300,
+            autowidth: true,
+            sortname: 'id',
+            sortorder: "asc",
+            viewrecords: true,
+            caption: "公司",
+            editurl: "{{url_for('scheduler.edit_company')}}",
+            url: "{{url_for('scheduler.list_company')}}",
+            datatype: "json",
+            mtype: 'GET',
+            colModel:
+                [
+                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', editable: false, search: false},
+                    {
+                        label: '公司',
+                        name: 'company_name',
+                        index: 'company_name',
+                        align: 'center',
+                        editable: false,
+                        search: false
+                    },
+                    {
+                        label: '状态',
+                        name: 'is_avaliable',
+                        index: 'is_avaliable',
+                        align: 'center',
+                        sortable: false,
+                        editable: true,
+                        edittype: 'select',
+                        editoptions: {value: {true: '启用', false: '禁用'}},
+                        search: false
+                    },
+
+                    {
+                        name: '操作',
+                        align: 'center',
+                        sortable: false,
+                        formatter: 'actions',
+                        formatoptions: {delbutton: false},
+                        search: false
+                    }
+                ],
+
+            jsonReader: {
+                root: "", // json中代表实际模型数据的入口
+                records: "total", // json中代表数据行总数的数据
+                page: "page", // json中代表当前页码的数据
+                total: "pages", // json中代表页码总数的数据
+                repeatitems: false
+            }
+        });
+
+    });
+
+    function findInterval() {
+        $.ajax({
+            url: "/scheduler/interval/list",
+            type: "GET",
+            success: function (res) {
+                if (res != null && res != "") { // 注册成功
+                    $(":radio[name='optradio'][value='" + res + "']").prop("checked", "checked");
+                }
+            }, fail: function (err) {
+                alert("error！");
+            }
+
+        });
+    }
+
+    function findStatus() {
+        $.ajax({
+            url: "/scheduler/status",
+            type: "GET",
+            success: function (res) {
+                if (res.status == "1" || res.status == "2") {
+
+
+                } else {
+
+                    $("#schedule").bootstrapSwitch('toggleState', false);
+                }
+            }, fail: function (err) {
+                alert("error！");
+            }
+
+        });
+    }
+</script>
+{% endblock %}
