@@ -9,7 +9,6 @@ from flask import Flask
 
 from .blueprints.auth import auth_bp
 from .blueprints.main import main_bp
-from .blueprints.scheduler import scheduler_bp
 from .blueprints.sysmanage import sysmanage_bp
 from .config import config
 from .extensions.csrf_protect import csrf
@@ -51,7 +50,6 @@ def register_blueprints(app):
     app.register_blueprint(main_bp)
     app.register_blueprint(sysmanage_bp, url_prefix='/config')
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(scheduler_bp, url_prefix='/scheduler')
 
 
 def register_shell_context(app):

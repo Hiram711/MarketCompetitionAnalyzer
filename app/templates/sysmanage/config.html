@@ -53,28 +53,18 @@
 
 <HR>
 <div class="row">
-
     <div class="col-sm-2 offset-md-1">
         <label>最近一次抓取进度:</label>
     </div>
     <div class="col-sm-4 progress" style="padding: 0px">
         <div class="progress-bar progress-bar-striped  progress-bar-animated bg-success" style="width:67%"></div>
     </div>
-
-
 </div>
 
+<HR>
 <div class="row">
     <div style="margin-top: 5%; float:right" class="col-md-10 offset-md-1">
         <table id="company"></table>
-    </div>
-</div>
-
-<div class="row">
-    <div style="margin-top: 5%;" class="col-md-10 offset-md-1">
-        <div id="mysearch"></div>
-        <table id="grid"></table>
-        <div id="gridpager"></div>
     </div>
 </div>
 
@@ -90,21 +80,24 @@
 <script>
     $(document).ready(function () {
 
-        findInterval();//获取抓取周期
+        findInterval(); //获取抓取周期
 
 
         $("#time :radio").click(function () { //变更抓取周期
             var a = $("#time input[type=radio]:checked").val();
             $.ajax({
-                url: "/scheduler/interval/reload",
-                data: {interval: a},
+                url: "{{url_for('sysmanage.reload_interval')}}",
+                data: {
+                    interval: a
+                },
                 dataType: "json",
                 type: "POST",
                 success: function (res) {
                     if (res != null && res != "") { // 注册成功
                         alert(res.message);
                     }
-                }, fail: function (err) {
+                },
+                fail: function (err) {
                     alert("error！");
                 }
 
@@ -113,19 +106,19 @@
         });
 
         $(".schedule").bootstrapSwitch({
-            onText: "开",      // 设置ON文本  
-            offText: "关",    // 设置OFF文本  
-            onColor: "success",// 设置ON文本颜色     (info/success/warning/danger/primary)  
-            offColor: "danger",  // 设置OFF文本颜色        (info/success/warning/danger/primary)  
-            size: "mini",    // 设置控件大小,从小到大  (mini/small/normal/large)  
-            handleWidth: "20",//设置控件宽度
-            onSwitchChange: function (event, state) {   // 当开关状态改变时触发  
+            onText: "开", // 设置ON文本  
+            offText: "关", // 设置OFF文本  
+            onColor: "success", // 设置ON文本颜色     (info/success/warning/danger/primary)  
+            offColor: "danger", // 设置OFF文本颜色        (info/success/warning/danger/primary)  
+            size: "mini", // 设置控件大小,从小到大  (mini/small/normal/large)  
+            handleWidth: "20", //设置控件宽度
+            onSwitchChange: function (event, state) { // 当开关状态改变时触发  
                 var ProductId = event.target.defaultValue;
                 var hostname = location.hostname;
                 if (state == true) {
 
                     $.ajax({
-                        url: "/scheduler/start",
+                        url: "{{url_for('sysmanage.start_scheduler')}}",
                         type: "POST",
                         success: function (res) {
 
@@ -142,7 +135,7 @@
                     });
                 } else {
                     $.ajax({
-                        url: "/scheduler/shutdown",
+                        url: "{{url_for('sysmanage.shutdown_scheduler')}}",
                         type: "POST",
                         success: function (res) {
 
@@ -161,16 +154,16 @@
             }
         });
 
-        findStatus();//获取定时开关状态
+        findStatus(); //获取定时开关状态
 
         $(".agent").bootstrapSwitch({
-            onText: "开",      // 设置ON文本  
-            offText: "关",    // 设置OFF文本  
-            onColor: "success",// 设置ON文本颜色     (info/success/warning/danger/primary)  
-            offColor: "danger",  // 设置OFF文本颜色        (info/success/warning/danger/primary)  
-            size: "mini",    // 设置控件大小,从小到大  (mini/small/normal/large)  
-            handleWidth: "20",//设置控件宽度
-            onSwitchChange: function (event, state) {   // 当开关状态改变时触发  
+            onText: "开", // 设置ON文本  
+            offText: "关", // 设置OFF文本  
+            onColor: "success", // 设置ON文本颜色     (info/success/warning/danger/primary)  
+            offColor: "danger", // 设置OFF文本颜色        (info/success/warning/danger/primary)  
+            size: "mini", // 设置控件大小,从小到大  (mini/small/normal/large)  
+            handleWidth: "20", //设置控件宽度
+            onSwitchChange: function (event, state) { // 当开关状态改变时触发  
                 var ProductId = event.target.defaultValue;
                 if (state == true) {
                     alert("ON");
@@ -181,13 +174,13 @@
         });
 
         $(".mail").bootstrapSwitch({
-            onText: "开",      // 设置ON文本  
-            offText: "关",    // 设置OFF文本  
-            onColor: "success",// 设置ON文本颜色     (info/success/warning/danger/primary)  
-            offColor: "danger",  // 设置OFF文本颜色        (info/success/warning/danger/primary)  
-            size: "mini",    // 设置控件大小,从小到大  (mini/small/normal/large)  
-            handleWidth: "20",//设置控件宽度
-            onSwitchChange: function (event, state) {   // 当开关状态改变时触发  
+            onText: "开", // 设置ON文本  
+            offText: "关", // 设置OFF文本  
+            onColor: "success", // 设置ON文本颜色     (info/success/warning/danger/primary)  
+            offColor: "danger", // 设置OFF文本颜色        (info/success/warning/danger/primary)  
+            size: "mini", // 设置控件大小,从小到大  (mini/small/normal/large)  
+            handleWidth: "20", //设置控件宽度
+            onSwitchChange: function (event, state) { // 当开关状态改变时触发  
                 var ProductId = event.target.defaultValue;
                 if (state == true) {
                     alert("ON");
@@ -216,8 +209,7 @@
                 var IS_JSON = true;
                 try {
                     var data = JSON.parse(request.responseText);
-                }
-                catch (err) {
+                } catch (err) {
                     IS_JSON = false;
                 }
 
@@ -231,70 +223,6 @@
             }
             alert(message);
         });
-
-        $("#grid").jqGrid({
-            styleUI: 'Bootstrap4',
-            iconSet: "Octicons",
-            responsive: true,
-            shrinkToFit: true,
-            autoScroll: true,
-            rowNum: 10,
-            rowList: [10, 20, 30],
-            height: "100%",
-            //height: 300,
-            autowidth: true,
-            pager: '#gridpager',
-            sortname: 'id',
-            sortorder: "asc",
-            viewrecords: true,
-            caption: "用户表",
-            editurl: "{{url_for('sysmanage.edit_user')}}",
-            url: "{{url_for('sysmanage.list_user')}}",
-            datatype: "json",
-            mtype: 'GET',
-            colModel:
-                [
-                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', editable: false, search: false},
-                    {label: '邮箱', name: 'email', index: 'email', align: 'center', editable: true, search: true},
-                    {label: '用户名', name: 'username', index: 'username', align: 'center', editable: true, search: true},
-                    {
-                        label: '角色',
-                        name: 'role',
-                        index: 'role',
-                        align: 'center',
-                        sortable: false,
-                        editable: true,
-                        edittype: 'select',
-                        editoptions: {dataUrl: "{{url_for('sysmanage.list_role')}}"},
-                        search: true
-                    },
-                    {
-                        label: '创建时间',
-                        name: 'create_time',
-                        index: 'create_time',
-                        align: 'center',
-                        editable: false,
-                        search: false
-                    },
-                    {
-                        label: '修改时间',
-                        name: 'modify_time',
-                        index: 'modify_time',
-                        align: 'center',
-                        editable: false,
-                        search: false
-                    },
-                    {name: '操作', align: 'center', sortable: false, formatter: 'actions', search: false}
-                ],
-            jsonReader: {
-                root: "users", // json中代表实际模型数据的入口
-                records: "total", // json中代表数据行总数的数据
-                page: "page", // json中代表当前页码的数据
-                total: "pages", // json中代表页码总数的数据
-                repeatitems: false
-            }
-        });
-        $("#grid").navGrid('#gridpager', {edit: false, add: true, del: false}, {}, {}, {}, {sopt: ['eq']});
 
 
         $("#company").jqGrid({
@@ -310,42 +238,55 @@
             sortorder: "asc",
             viewrecords: true,
             caption: "公司",
-            editurl: "{{url_for('scheduler.edit_company')}}",
-            url: "{{url_for('scheduler.list_company')}}",
+            editurl: "{{url_for('sysmanage.edit_company')}}",
+            url: "{{url_for('sysmanage.list_company')}}",
             datatype: "json",
             mtype: 'GET',
-            colModel:
-                [
-                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', editable: false, search: false},
-                    {
-                        label: '公司',
-                        name: 'company_name',
-                        index: 'company_name',
-                        align: 'center',
-                        editable: false,
-                        search: false
+            colModel: [{
+                label: '序号',
+                name: 'id',
+                index: 'id',
+                key: false,
+                align: 'center',
+                editable: false,
+                search: false
+            },
+                {
+                    label: '公司',
+                    name: 'company_name',
+                    index: 'company_name',
+                    align: 'center',
+                    editable: false,
+                    search: false
+                },
+                {
+                    label: '状态',
+                    name: 'is_avaliable',
+                    index: 'is_avaliable',
+                    align: 'center',
+                    sortable: false,
+                    editable: true,
+                    edittype: 'select',
+                    editoptions: {
+                        value: {
+                            true: '启用',
+                            false: '禁用'
+                        }
                     },
-                    {
-                        label: '状态',
-                        name: 'is_avaliable',
-                        index: 'is_avaliable',
-                        align: 'center',
-                        sortable: false,
-                        editable: true,
-                        edittype: 'select',
-                        editoptions: {value: {true: '启用', false: '禁用'}},
-                        search: false
-                    },
+                    search: false
+                },
 
-                    {
-                        name: '操作',
-                        align: 'center',
-                        sortable: false,
-                        formatter: 'actions',
-                        formatoptions: {delbutton: false},
-                        search: false
-                    }
-                ],
+                {
+                    name: '操作',
+                    align: 'center',
+                    sortable: false,
+                    formatter: 'actions',
+                    formatoptions: {
+                        delbutton: false
+                    },
+                    search: false
+                }
+            ],
 
             jsonReader: {
                 root: "", // json中代表实际模型数据的入口
@@ -360,13 +301,14 @@
 
     function findInterval() {
         $.ajax({
-            url: "/scheduler/interval/list",
+            url: "{{url_for('sysmanage.list_interval')}}",
             type: "GET",
             success: function (res) {
                 if (res != null && res != "") { // 注册成功
                     $(":radio[name='optradio'][value='" + res + "']").prop("checked", "checked");
                 }
-            }, fail: function (err) {
+            },
+            fail: function (err) {
                 alert("error！");
             }
 
@@ -375,17 +317,18 @@
 
     function findStatus() {
         $.ajax({
-            url: "/scheduler/status",
+            url: "{{url_for('sysmanage.get_scheduler_status')}}",
             type: "GET",
             success: function (res) {
-                if (res.status == "1" || res.status == "2") {
+                if (res.status == "1") {
 
 
                 } else {
 
                     $("#schedule").bootstrapSwitch('toggleState', false);
                 }
-            }, fail: function (err) {
+            },
+            fail: function (err) {
                 alert("error！");
             }
 

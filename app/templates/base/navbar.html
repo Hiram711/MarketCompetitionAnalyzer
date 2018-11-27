@@ -22,8 +22,8 @@
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     <a class="dropdown-item {% if request.path == url_for('sysmanage.user_index') %}active{% endif %}"
                        href="{{url_for('sysmanage.user_index')}}">用户管理</a>
-                    <a class="dropdown-item {% if request.path == url_for('sysmanage.scheduleManage') %}active{% endif %}"
-                       href="{{url_for('sysmanage.scheduleManage')}}">定时管理</a>
+                    <a class="dropdown-item {% if request.path == url_for('sysmanage.index') %}active{% endif %}"
+                       href="{{url_for('sysmanage.index')}}">爬虫管理</a>
                     <a class="dropdown-item" href="#">Something else here</a>
                 </div>
             </li>
