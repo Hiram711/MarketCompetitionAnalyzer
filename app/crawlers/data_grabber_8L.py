@@ -66,11 +66,7 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
         dep_date.send_keys(flight_date)
 
         # submit to query
-        action3 = ActionChains(driver)
-        close_cookie_notice = driver.find_element_by_css_selector('.notice-cookie ._close-icon')
-        submit = driver.find_element_by_id('submitSearch')
-        action3.move_by_offset(0, 0).click().move_to_element(close_cookie_notice).click().move_to_element(
-            submit).click().perform()
+        driver.execute_script('$("#searchflight").submit();')
 
         try:
             WebDriverWait(driver, 20, 0.5).until(EC.presence_of_element_located((By.ID, 'selectedFlights')))
@@ -119,7 +115,7 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
             dep_city = price.attrs['depcity']
             arv_city = price.attrs['arrcity']
             price_class2 = price.select_one('.title').get_text()
-            price_value = price.attrs['zhe']
+            price_value = price.attrs['flg'].split(';')[8]
             result.append(
                 dict(dep_city=dep_city, arv_city=arv_city, is_direct=is_direct, transfer_city=transfer_city,
                      flt_no=flt_no, airplane_type=airplane_type,
@@ -131,6 +127,7 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
 
 
 if __name__ == '__main__':
-    rs = data_grabber_8l('昆明', '上海', '2018-12-01', headless=False)
+    rs = data_grabber_8l('昆明', '成都', '2018-11-23', headless=False)
+    print(rs)
     for i in rs:
         print(i)

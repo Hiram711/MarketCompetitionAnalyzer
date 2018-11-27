@@ -76,7 +76,7 @@ def reload_interval():
     db.session.add(config_interval)
     companies = Company.query.filter_by(is_avaliable=True).all()
     for company in companies:
-        scheduler.add_job(id=str(company.id), func=company.cralwer_func,
+        scheduler.add_job(id=str(company.id), func=company.crawler_func,
                           args=(current_app.config['SQLALCHEMY_DATABASE_URI'], current_app.config['CRAWLER_DAYS']),
                           trigger='interval', hours=new_interval, replace_existing=True)
     return jsonify(message='Interval changed.'), 200
