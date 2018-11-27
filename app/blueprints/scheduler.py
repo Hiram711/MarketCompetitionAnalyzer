@@ -96,14 +96,14 @@ def edit_company():
     if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
         return jsonify(message='Login or privileges required.'), 403
     id = request.values.get('id')
-    is_avaliable = request.values.get('is_avaliable', default=False, type=bool)
+    is_avaliable = True if request.values.get('is_avaliable') == 'true' else False
     config_interval = Interval.query.first().value
     company = Company.query.get(id)
     if company:
         company.is_avaliable = is_avaliable
         company.modify_time = datetime.now()
         company.editor = current_user._get_current_object()
-        db.session.add(edit_company)
+        db.session.add(company)
         if is_avaliable:
             scheduler.add_job(id=str(company.id), func=company.crawler_func,
                               args=(current_app.config['SQLALCHEMY_DATABASE_URI'], current_app.config['CRAWLER_DAYS']),
