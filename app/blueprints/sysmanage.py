@@ -21,6 +21,11 @@ sysmanage_bp = Blueprint('sysmanage', __name__)
 def user_index():
     return render_template('sysmanage/user.html')
 
+@sysmanage_bp.route('/user/schedule')
+@login_required
+def scheduleManage():
+    return render_template('sysmanage/scheduleManage.html')
+
 
 # ajax
 @sysmanage_bp.route('/user/list')
