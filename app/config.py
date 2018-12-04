@@ -43,7 +43,7 @@ class BaseConfig:
 
     JOBS = []
     SCHEDULER_EXECUTORS = {
-        'default': {'type': 'threadpool', 'max_workers': 40}
+        'default': {'type': 'processpool', 'max_workers': 40}
     }
     SCHEDULER_JOB_DEFAULTS = {
         'coalesce': True,
