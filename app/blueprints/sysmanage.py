@@ -217,10 +217,11 @@ def list_interval():
 def reload_interval():
     if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
         return jsonify(message='Login or privileges required.'), 401
-    new_interval = request.values.get('interval')
+    new_interval = request.values.get('interval', type=int)
     config_interval = Interval.query.first()
     config_interval.value = new_interval
     db.session.add(config_interval)
+    db.session.commit()  # have to commit manually to avoid reloading jobs
     companies = Company.query.filter_by(is_avaliable=True).all()
     for company in companies:
         scheduler.add_job(id=str(company.id), func=company.crawler_func,
