@@ -68,6 +68,13 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
         # submit to query
         driver.execute_script('$("#searchflight").submit();')
 
+        # switch to the new window
+        all_windows = driver.window_handles
+        current_window = driver.current_window_handle
+        for i in all_windows:
+            if i != current_window:
+                driver.switch_to.window(i)
+
         try:
             WebDriverWait(driver, 20, 0.5).until(EC.presence_of_element_located((By.ID, 'selectedFlights')))
         finally:
@@ -127,7 +134,7 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
 
 
 if __name__ == '__main__':
-    rs = data_grabber_8l('昆明', '成都', '2018-11-23', headless=False)
+    rs = data_grabber_8l('昆明', '成都', '2018-12-23', headless=False)
     print(rs)
     for i in rs:
         print(i)
