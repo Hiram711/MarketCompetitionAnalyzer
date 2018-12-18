@@ -156,7 +156,7 @@ def task_8L(db_url, add_days=7):
                         dt.arv_time = datetime.strptime(row['arv_date'].strip(), '%Y-%m-%d %H:%M').strftime('%H:%M')
                         dt.arv_airport = row['arv_airport'].strip()
                         dt.flight_no = row['flt_no'].strip()
-                        dt.flight_date = begin_date + timedelta(days=i)
+                        dt.flight_date = (begin_date + timedelta(days=i)).date()
                         dt.airplane_type = row['airplane_type'].strip()
                         dt.flight_time = row['flt_time'].strip()
                         dt.is_direct = row['is_direct']

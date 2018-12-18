@@ -15,7 +15,6 @@ selenium = "*"
 "bs4" = "*"
 "html5lib" = "*"
 flask-apscheduler = "*"
-cx-oracle = "==6.0.2"
 flask-mail = "*"
 
 [dev-packages]
