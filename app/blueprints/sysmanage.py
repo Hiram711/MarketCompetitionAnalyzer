@@ -267,7 +267,9 @@ def list_job():
         scheduler.start()
         scheduler.pause()
     for i in scheduler.get_jobs():
-        item = dict(id=i.id, name=i.name, args=i.args, kwargs=i.kwargs, next_run_time=i.next_run_time,
+        # item = dict(id=i.id, name=i.name, args=i.args, kwargs=i.kwargs, next_run_time=i.next_run_time,
+        #             func=i.func.__name__)
+        item = dict(id=i.id, name=i.name, kwargs=i.kwargs, next_run_time=i.next_run_time,
                     func=i.func.__name__)
         result.append(item)
     return jsonify(result), 200
