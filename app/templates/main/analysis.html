@@ -1,0 +1,83 @@
+{% extends "base/layout.html" %}
+{% block styles %}
+{{super()}}
+<link href="https://cdn.bootcss.com/octicons/4.4.0/font/octicons.css" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='css/jqgrid/ui.jqgrid-bootstrap4.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/datetimepicker/bootstrap-datetimepicker.min.css')}}">
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+{% endblock %}
+
+{% block content %}
+<style>
+.mark {
+    padding: 0px;
+    background: white;
+}
+.form-control{
+    display:inline;
+}
+.btn btn-light{
+    font-size: 5px;
+}
+</style>
+<h4>爬虫管理</h4>
+<HR>
+<form>
+<div class="row offset-md-1">
+    <div class = "col-sm-3" id="content">
+
+            <label class = "mark col-sm-3">对比内容:</label>
+            <label class="col-sm-4 radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="economic">经济舱</label>
+            <label class="col-sm-4 radio-inline" style="padding-left: 10px"><input type="radio"  name="optradio"
+                                                                          value="firstclass">头等舱</label>
+
+    </div>
+    <div class = " col-sm-3">
+    <label class = " mark col-sm-3">航班日期:</label>
+    <input class = "form-control col-sm-6" name="entryDate" placeholder="请选择航班日期" id="blrz-entry-date-start" type="text" >
+    </div>
+
+    <div class = " col-sm-4">
+        <label class = "mark col-sm-1" >航段:</label>
+        <select class="form-control col-sm-4" id="Passage">
+        </select>
+        <label class = "mark col-sm-2" >时间段:</label>
+        <select class="form-control col-sm-4" id="timearea">
+        </select>
+    </div>
+</div>
+</form>
+
+<HR>
+<button type="button" class="btn btn-light"><i class ="fa fa-angle-left"> 前一周</i></button>
+<button type="button" class="btn btn-light">后一周 <i class ="fa fa-angle-right"></i></button>
+<div class="row">
+
+
+{% endblock %}
+
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='js/jquery-ui/jquery-ui.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/jquery.jqGrid.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/datetimepicker/bootstrap-datetimepicker.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/datetimepicker/bootstrap-datetimepicker.zh-CN.js')}}"></script>
+<script>
+ $(document).ready(function () {
+     $("#blrz-entry-date-start").datetimepicker({//选择年月日
+         format: 'yyyy-mm-dd',
+         language: 'zh-CN',
+         weekStart: 1,
+         todayBtn: 1,//显示‘今日’按钮
+         autoclose: 1,
+         startView: 2,
+         minView: 2,  //Number, String. 默认值：0, 'hour'，日期时间选择器所能够提供的最精确的时间选择视图。
+
+         forceParse: 0
+     });
+ });
+</script>
+{% endblock %}

@@ -7,6 +7,8 @@
       rel="stylesheet">
 {% endblock %}
 {% block content %}
+<h4>爬虫管理</h4>
+<HR>
 <div class="col-md-4 offset-md-4">
     {% include 'base/msg.html' %}
 </div>
@@ -63,9 +65,16 @@
 
 <HR>
 <div class="row">
-    <div style="margin-top: 5%; float:right" class="col-md-10 offset-md-1">
+
+    <div style=" padding-top:2%;float:left" class="col-md-5">
         <table id="company"></table>
     </div>
+
+     <div style="padding-top:2%;float:right" class="col-md-5 offset-md-1">
+        <table id="segment"></table>
+          <div id="gridpager"></div>
+    </div>
+
 </div>
 
 
@@ -74,13 +83,14 @@
 {% block scripts %}
 {{super()}}
 <script src="{{url_for('static', filename='js/jquery-ui/jquery-ui.min.js')}}"></script>
-<script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
 <script src="{{url_for('static', filename='js/jqgird/jquery.jqGrid.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/js/bootstrap-switch.min.js"></script>
 <script>
     $(document).ready(function () {
 
         findInterval(); //获取抓取周期
+        findStatus(); //获取定时开关状态
 
 
         $("#time :radio").click(function () { //变更抓取周期
@@ -154,7 +164,6 @@
             }
         });
 
-        findStatus(); //获取定时开关状态
 
         $(".agent").bootstrapSwitch({
             onText: "开", // 设置ON文本  
@@ -237,7 +246,7 @@
             sortname: 'id',
             sortorder: "asc",
             viewrecords: true,
-            caption: "公司",
+            caption: "配置抓取公司",
             editurl: "{{url_for('sysmanage.edit_company')}}",
             url: "{{url_for('sysmanage.list_company')}}",
             datatype: "json",
@@ -297,6 +306,65 @@
             }
         });
 
+
+         $("#segment").jqGrid({
+            styleUI: 'Bootstrap4',
+            iconSet: "Octicons",
+            responsive: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 10,
+            rowList: [10, 20, 30],
+            height: "100%",
+            //height: 300,
+            autowidth: true,
+            pager: '#gridpager',
+            sortname: 'id',
+            sortorder: "asc",
+            viewrecords: true,
+            caption: "用户表",
+            editurl: "{{url_for('sysmanage.edit_segment')}}",
+            url: "{{url_for('sysmanage.list_segment')}}",
+            datatype: "json",
+            mtype: 'GET',
+            colModel:
+                [
+                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', editable: false, search: false},
+                    {label: '起飞城市', name: 'dep_city', index: 'dep_city', align: 'center', editable: true, search: true},
+                    {label: '到达城市', name: 'arv_city', index: 'arv_city', align: 'center', editable: true, search: true},
+                    {
+                        label: '创建时间',
+                        name: 'create_time',
+                        index: 'create_time',
+                        align: 'center',
+                        editable: false,
+                        search: false
+                    },
+                    {
+                        label: '修改时间',
+                        name: 'modify_time',
+                        index: 'modify_time',
+                        align: 'center',
+                        editable: false,
+                        search: false
+                    },
+                    {label: '用户名', name: 'editor', index: 'editor', align: 'center', editable: false, search: false},
+                    {name: '操作', align: 'center', sortable: false, formatter: 'actions', search: false}
+                ],
+            jsonReader: {
+                root: "segments", // json中代表实际模型数据的入口
+                records: "total", // json中代表数据行总数的数据
+                page: "page", // json中代表当前页码的数据
+                total: "pages", // json中代表页码总数的数据
+                repeatitems: false
+            }
+        });
+        $("#segment").navGrid('#gridpager', {edit: false, add: true, del: false}, {}, {}, {}, {
+            sopt: ['eq'],
+            multipleSearch: true
+        });
+
+
     });
 
     function findInterval() {
@@ -319,13 +387,14 @@
         $.ajax({
             url: "{{url_for('sysmanage.get_scheduler_status')}}",
             type: "GET",
+            async:false,
             success: function (res) {
                 if (res.status == "1") {
 
 
                 } else {
 
-                    $("#schedule").bootstrapSwitch('toggleState', false);
+                    $("#schedule").removeAttr("checked");
                 }
             },
             fail: function (err) {
