@@ -3,7 +3,8 @@
 __author__ = 'Hiram Zhang'
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
+from threading import Thread
 
 from flask import Blueprint, render_template, request, jsonify, Markup
 from flask import redirect, url_for, current_app
@@ -272,13 +273,13 @@ def list_job():
     return jsonify(result), 200
 
 
-# use this view to test job
+# use this view to start job manually
 @sysmanage_bp.route('/scheduler/start/<int:id>')
 def start_job(id):
     if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
         return jsonify(message='Login or privileges required.'), 403
     company = Company.query.get(id)
-    scheduler.add_job(id=str(company.id), func=company.crawler_func,
-                      args=(current_app.config['SQLALCHEMY_DATABASE_URI'], current_app.config['CRAWLER_DAYS']),
-                      next_run_time=datetime.now() + timedelta(seconds=10), replace_existing=True)
-    return jsonify(dict(status=scheduler.state)), 200
+    thr = Thread(target=company.crawler_func,
+                 args=[current_app.config['SQLALCHEMY_DATABASE_URI'], current_app.config['CRAWLER_DAYS']])
+    thr.start()
+    return jsonify(dict(job_id=id, status='running')), 200

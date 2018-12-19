@@ -44,7 +44,7 @@ def task_MU(db_url, add_days=7):
                 log.segment_id = segment.id
                 get_time = datetime.now()
                 log.begin_date = get_time
-                log.flight_date = begin_date + timedelta(days=i)
+                log.flight_date = (begin_date + timedelta(days=i)).date()
                 session.add(log)
                 session.commit()
                 log = session.query(CrawlerLog).get(log.id)
@@ -62,7 +62,7 @@ def task_MU(db_url, add_days=7):
                             dt.arv_time = re_time.findall(row['arrv'])[0].strip()
                             dt.arv_airport = re_time.split(row['arrv'])[-1].strip()
                             dt.flight_no = row['fltno'].strip()
-                            dt.flight_date = begin_date + timedelta(days=i)
+                            dt.flight_date = (begin_date + timedelta(days=i)).date()
                             dt.airplane_type = row['airplane_type'].strip()
                             dt.flight_time = row['flt_tm'].strip()
                             if row['is_direct'] == '经停':
@@ -127,7 +127,7 @@ def task_8L(db_url, add_days=7):
                 log.segment_id = segment.id
                 get_time = datetime.now()
                 log.begin_date = get_time
-                log.flight_date = begin_date + timedelta(days=i)
+                log.flight_date = (begin_date + timedelta(days=i)).date()
                 session.add(log)
                 session.commit()
                 log = session.query(CrawlerLog).get(log.id)

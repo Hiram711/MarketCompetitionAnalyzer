@@ -16,6 +16,7 @@ MAIL_DEFAULT_SENDER=your email sender
 MAIL_SERVER=your email server
 MAIL_USERNAME=your email account
 MAIL_PASSWORD=your email pwd
+DATABASE_URI=your db link
 "
 $ flask init
 $ flask run

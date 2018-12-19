@@ -16,6 +16,7 @@ selenium = "*"
 "html5lib" = "*"
 flask-apscheduler = "*"
 flask-mail = "*"
+pymysql = "*"
 
 [dev-packages]
 
