@@ -76,9 +76,10 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
                 driver.switch_to.window(i)
 
         try:
-            WebDriverWait(driver, 20, 0.5).until(EC.presence_of_element_located((By.ID, 'selectedFlights')))
+            WebDriverWait(driver, 20, 1).until(EC.presence_of_element_located((By.ID, 'selectedFlights')))
         finally:
             print('New page''s elements Loaded.')
+        time.sleep(3)
 
         # driver.execute_script("return getFlightB2C('2018-11-28');")
         # time.sleep(2)

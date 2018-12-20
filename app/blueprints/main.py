@@ -75,7 +75,6 @@ def analysis_overview_query():
     for row in rs_timeinfo:
         rs_timeinfo_list.append({'company': row[0], 'get_time': row[1]})
     result = {'data': rs_data_list, 'time_info': rs_timeinfo_list, 'total': len(rs_data_list)}
-    print(analysis_sql)
     return jsonify(result), 200
 
 
