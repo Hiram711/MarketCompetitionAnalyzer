@@ -14,7 +14,7 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 @login_required
 def index():
-    return render_template('main/index.html')
+    return render_template('main/analysis.html')
 
 
 @main_bp.route('/hello')
