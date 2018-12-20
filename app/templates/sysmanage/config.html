@@ -65,16 +65,17 @@
 
 <HR>
 <div class="row">
-
-    <div style=" padding-top:2%;float:left" class="col-md-5">
+    <div class="col-md-5 offset-md-1">
         <table id="company"></table>
     </div>
+</div>
 
-     <div style="padding-top:2%;float:right" class="col-md-5 offset-md-1">
+<HR>
+<div class="row">
+    <div class="col-md-10 offset-md-1">
         <table id="segment"></table>
-          <div id="gridpager"></div>
+        <div id="gridpager"></div>
     </div>
-
 </div>
 
 
@@ -83,7 +84,7 @@
 {% block scripts %}
 {{super()}}
 <script src="{{url_for('static', filename='js/jquery-ui/jquery-ui.min.js')}}"></script>
-    <script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
 <script src="{{url_for('static', filename='js/jqgird/jquery.jqGrid.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/js/bootstrap-switch.min.js"></script>
 <script>
@@ -307,7 +308,7 @@
         });
 
 
-         $("#segment").jqGrid({
+        $("#segment").jqGrid({
             styleUI: 'Bootstrap4',
             iconSet: "Octicons",
             responsive: true,
@@ -322,7 +323,7 @@
             sortname: 'id',
             sortorder: "asc",
             viewrecords: true,
-            caption: "用户表",
+            caption: "配置抓取航段",
             editurl: "{{url_for('sysmanage.edit_segment')}}",
             url: "{{url_for('sysmanage.list_segment')}}",
             datatype: "json",
@@ -387,7 +388,7 @@
         $.ajax({
             url: "{{url_for('sysmanage.get_scheduler_status')}}",
             type: "GET",
-            async:false,
+            async: false,
             success: function (res) {
                 if (res.status == "1") {
 

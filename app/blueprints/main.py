@@ -14,15 +14,16 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 @login_required
 def index():
-    return render_template('main/analysis.html')
-
-
-@main_bp.route('/hello')
-def hello():
-    return 'Hello World!'
+    return render_template('main/index.html')
 
 
 @main_bp.route('/analysis/overview')
+@login_required
+def analysis_overview_index():
+    return render_template('main/analysis.html')
+
+
+@main_bp.route('/analysis/overview/query')
 def analysis_overview_query():
     segment_id = request.args.get('segment_id', None, type=int)
     flight_date = request.args.get('flight_date', None, type=str)
@@ -76,3 +77,9 @@ def analysis_overview_query():
     result = {'data': rs_data_list, 'time_info': rs_timeinfo_list, 'total': len(rs_data_list)}
     print(analysis_sql)
     return jsonify(result), 200
+
+
+@main_bp.route('/analysis/custom')
+@login_required
+def analysis_custom_index():
+    return 'To be developed'
