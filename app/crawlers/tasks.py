@@ -11,10 +11,11 @@ from sqlalchemy.orm import Session
 
 from app.crawlers.data_grabber_8L import data_grabber_8l
 from app.crawlers.data_grabber_MU import data_grabber_mu
+from app.utils import get_rnd_proxy
 
 
 # make data cleaned and recorded
-def task_MU(db_url, add_days=7):
+def task_MU(db_url, add_days=7, use_proxy=False):
     try:
         # create a new data connection using reflection,
         # in this way we can avoid using app context and the fun can run independently
@@ -37,7 +38,9 @@ def task_MU(db_url, add_days=7):
         for segment in segments:
             for i in range(add_days):
                 query_date = (begin_date + timedelta(days=i)).strftime('%Y-%m-%d')
-                # proxy = get_rnd_proxy()
+                proxy = None
+                if use_proxy:
+                    proxy = get_rnd_proxy()
                 log = CrawlerLog()
                 log.status = 'Running'
                 log.company_id = company.id
@@ -50,7 +53,7 @@ def task_MU(db_url, add_days=7):
                 log = session.query(CrawlerLog).get(log.id)
                 try:
                     # result= data_grabber_mu(segment.dep_city,segment.arv_city,flight_date=query_date,proxy=proxy)
-                    result = data_grabber_mu(segment.dep_city, segment.arv_city, flight_date=query_date)
+                    result = data_grabber_mu(segment.dep_city, segment.arv_city, flight_date=query_date, proxy=proxy)
                     for row in result:
                         for subrow in row['price_list']:
                             dt = PriceDetail()
@@ -100,7 +103,7 @@ def task_MU(db_url, add_days=7):
         session.close()
 
 
-def task_8L(db_url, add_days=7):
+def task_8L(db_url, add_days=7, use_proxy=False):
     try:
         # create a new data connection using reflection,
         # in this way we can avoid using app context and the fun can run independently
@@ -120,7 +123,9 @@ def task_8L(db_url, add_days=7):
         for segment in segments:
             for i in range(add_days):
                 query_date = (begin_date + timedelta(days=i)).strftime('%Y-%m-%d')
-                # proxy = get_rnd_proxy()
+                proxy = None
+                if use_proxy:
+                    proxy = get_rnd_proxy()
                 log = CrawlerLog()
                 log.status = 'Running'
                 log.company_id = company.id
@@ -133,7 +138,7 @@ def task_8L(db_url, add_days=7):
                 log = session.query(CrawlerLog).get(log.id)
                 try:
                     # result= data_grabber_mu(segment.dep_city,segment.arv_city,flight_date=query_date,proxy=proxy)
-                    result = data_grabber_8l(segment.dep_city, segment.arv_city, flight_date=query_date)
+                    result = data_grabber_8l(segment.dep_city, segment.arv_city, flight_date=query_date, proxy=proxy)
 
                     # solve the situation that one city has more than one airports
                     if segment.dep_city == '上海':

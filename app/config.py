@@ -39,7 +39,6 @@ class BaseConfig:
     CRAWLER_FUNCS = {'MU': task_MU,
                      '8L': task_8L
                      }  # set different func for different company
-    CRAWLER_DAYS = 7  # set how many days after current date the crawler will search for
 
     JOBS = []
     SCHEDULER_EXECUTORS = {

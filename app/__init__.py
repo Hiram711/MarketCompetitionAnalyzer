@@ -18,7 +18,7 @@ from .extensions.flaskmigrate import migrate
 from .extensions.flasksqlalchemy import db
 from .extensions.loginmanager import login_manager
 from .models.auth import Permission, User, Role
-from .models.cralwer import CrawlerLog, Company, Segment, Price, PriceDetail, Interval
+from .models.cralwer import CrawlerLog, Company, Segment, Price, PriceDetail, Option
 
 
 def create_app(config_name=None):
@@ -56,7 +56,7 @@ def register_shell_context(app):
     @app.shell_context_processor
     def make_shell_context():
         return dict(db=db, User=User, Role=Role, Permission=Permission, Company=Company, CrawlerLog=CrawlerLog,
-                    Segment=Segment, Price=Price, PriceDetail=PriceDetail, scheduler=scheduler, Interval=Interval)
+                    Segment=Segment, Price=Price, PriceDetail=PriceDetail, scheduler=scheduler, Option=Option)
 
 
 def register_template_context(app):
@@ -82,10 +82,10 @@ def register_commands(app):
         db.session.add(admin)
         db.session.commit()
 
-        click.echo('Initializing the target Companies...')
+        click.echo('Initializing the target companies...')
         Company.insert_companies()
 
-        click.echo('Initializing the default Interval...')
-        Interval.insert_interval()
+        click.echo('Initializing the default options...')
+        Option.insert_options()
 
         click.echo('Done.')

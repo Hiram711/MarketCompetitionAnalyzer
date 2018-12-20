@@ -129,14 +129,23 @@ class Price(db.Model):
     price3 = db.Column(db.Integer)
 
 
-# use this model to save the user config about crawler running interval
-class Interval(db.Model):
-    __tablename__ = 'intervals'
+# use this model to save the user options
+class Option(db.Model):
+    __tablename__ = 'options'
     id = db.Column(db.Integer, primary_key=True)
-    value = db.Column(db.Integer, default=2)
+    name = db.Column(db.String(40), unique=True)
+    value = db.Column(db.Integer)
 
     @staticmethod
-    def insert_interval():
-        i = Interval()
-        db.session.add(i)
+    def insert_options():
+        # set the crawler running interval
+        interval = Option(name='interval', value=2)
+
+        # set whether to use proxy server
+        use_proxy = Option(name='use_proxy', value=0)
+
+        # set how many days after current date the crawler will search for
+        crawler_days = Option(name='crawler_days', value=7)
+
+        db.session.add_all(interval, use_proxy, crawler_days)
         db.session.commit()

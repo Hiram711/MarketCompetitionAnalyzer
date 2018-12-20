@@ -27,4 +27,7 @@ def redirect_back(default='main.index', **kwargs):
 
 
 def get_rnd_proxy():
-    pass
+    '''define this func according to your proxy server info.It should
+    return a string like 'https://127.0.0.1:8080' or None(means proxy will not be used)
+    '''
+    return None

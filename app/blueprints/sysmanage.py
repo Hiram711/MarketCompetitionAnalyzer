@@ -14,7 +14,7 @@ from sqlalchemy import text
 from app.extensions.flaskapscheduler import scheduler
 from app.extensions.flasksqlalchemy import db
 from app.models.auth import User, Permission, Role
-from app.models.cralwer import Company, Interval
+from app.models.cralwer import Company, Option
 from app.models.cralwer import Segment
 
 sysmanage_bp = Blueprint('sysmanage', __name__)
@@ -185,7 +185,9 @@ def edit_company():
         return jsonify(message='Login or privileges required.'), 403
     id = request.values.get('id')
     is_avaliable = True if request.values.get('is_avaliable') == 'true' else False
-    config_interval = Interval.query.first().value
+    option_interval = Option.query.filter_by(name='interval').first().value
+    option_use_proxy = True if Option.query.filter_by(name='use_proxy').first().value == 1 else False
+    option_crawler_days = Option.query.filter_by(name='crawler_days').first().value
     company = Company.query.get(id)
     if company:
         company.is_avaliable = is_avaliable
@@ -194,8 +196,9 @@ def edit_company():
         db.session.add(company)
         if is_avaliable:
             scheduler.add_job(id=str(company.id), func=company.crawler_func,
-                              args=(current_app.config['SQLALCHEMY_DATABASE_URI'], current_app.config['CRAWLER_DAYS']),
-                              trigger='interval', hours=config_interval, replace_existing=True)
+                              args=(
+                                  current_app.config['SQLALCHEMY_DATABASE_URI'], option_crawler_days, option_use_proxy),
+                              trigger='interval', hours=option_interval, replace_existing=True)
             return jsonify(message='Job added'), 200
         else:
             if scheduler.get_job(str(company.id)):
@@ -209,8 +212,8 @@ def edit_company():
 def list_interval():
     if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
         return jsonify(message='Login or privileges required.'), 401
-    config_interval = Interval.query.first().value
-    return jsonify(config_interval), 200
+    option_interval = Option.query.filter_by(name='interval').first().value
+    return jsonify(option_interval), 200
 
 
 # use this view to change the interval
@@ -219,15 +222,48 @@ def reload_interval():
     if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
         return jsonify(message='Login or privileges required.'), 401
     new_interval = request.values.get('interval', type=int)
-    config_interval = Interval.query.first()
-    config_interval.value = new_interval
-    db.session.add(config_interval)
+    option_interval = Option.query.filter_by(name='interval').first()
+    option_interval.value = new_interval
+    db.session.add(option_interval)
     db.session.commit()  # have to commit manually to avoid reloading jobs
     companies = Company.query.filter_by(is_avaliable=True).all()
+    option_use_proxy = True if Option.query.filter_by(name='use_proxy').first().value == 1 else False
+    option_crawler_days = Option.query.filter_by(name='crawler_days').first().value
     for company in companies:
         scheduler.add_job(id=str(company.id), func=company.crawler_func,
-                          args=(current_app.config['SQLALCHEMY_DATABASE_URI'], current_app.config['CRAWLER_DAYS']),
+                          args=(current_app.config['SQLALCHEMY_DATABASE_URI'], option_crawler_days, option_use_proxy),
                           trigger='interval', hours=new_interval, replace_existing=True)
+    return jsonify(message='Interval changed.'), 200
+
+
+@sysmanage_bp.route('/use_proxy/list')
+def list_use_proxy():
+    if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
+        return jsonify(message='Login or privileges required.'), 401
+    option_use_proxy = Option.query.filter_by(name='use_proxy').first().value
+    return jsonify(option_use_proxy), 200
+
+
+# use this view to change the options use_proxy
+@sysmanage_bp.route('/use_proxy/reload', methods=['POST'])
+def reload_use_proxy():
+    if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
+        return jsonify(message='Login or privileges required.'), 401
+    use_proxy = request.values.get('use_proxy', type=int)
+    if use_proxy not in (0, 1):
+        return jsonify(message='Invalid parameters..'), 400
+    option_use_proxy = Option.query.filter_by(name='use_proxy').first()
+    option_use_proxy.value = use_proxy
+    db.session.add(option_use_proxy)
+    db.session.commit()  # have to commit manually to avoid reloading jobs
+    companies = Company.query.filter_by(is_avaliable=True).all()
+    option_use_proxy = True if use_proxy == 1 else False
+    option_crawler_days = Option.query.filter_by(name='crawler_days').first().value
+    option_interval = Option.query.filter_by(name='interval').first().value
+    for company in companies:
+        scheduler.add_job(id=str(company.id), func=company.crawler_func,
+                          args=(current_app.config['SQLALCHEMY_DATABASE_URI'], option_crawler_days, option_use_proxy),
+                          trigger='interval', hours=option_interval, replace_existing=True)
     return jsonify(message='Interval changed.'), 200
 
 
@@ -281,7 +317,9 @@ def start_job(id):
     if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
         return jsonify(message='Login or privileges required.'), 403
     company = Company.query.get(id)
+    option_use_proxy = True if Option.query.filter_by(name='use_proxy').first().value == 1 else False
+    option_crawler_days = Option.query.filter_by(name='crawler_days').first().value
     thr = Thread(target=company.crawler_func,
-                 args=[current_app.config['SQLALCHEMY_DATABASE_URI'], current_app.config['CRAWLER_DAYS']])
+                 args=[current_app.config['SQLALCHEMY_DATABASE_URI'], option_crawler_days, option_use_proxy])
     thr.start()
     return jsonify(dict(job_id=id, status='running')), 200
