@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, jsonify, request
 from flask_login import login_required
 
 from app.extensions.flasksqlalchemy import db
+from app.models.cralwer import Segment
 
 main_bp = Blueprint('main', __name__)
 
@@ -21,6 +22,14 @@ def index():
 @login_required
 def analysis_overview_index():
     return render_template('main/analysis.html')
+
+
+@main_bp.route('/select/segments')
+@login_required
+def analysis_segments():
+    segments = Segment.query.all()
+    segment_list = [segment.to_json() for segment in segments]
+    return jsonify(segment_list), 200
 
 
 @main_bp.route('/analysis/overview/query')
@@ -39,7 +48,7 @@ def analysis_overview_query():
         return jsonify(message='Invalid parameters..'), 400
 
     analysis_sql = '''
-    SELECT CONCAT(dep_city,'-',arv_city) seg,SUBSTRING(dep_time,1,2) as time_value,count(distinct flight_no)flts_cnt,count(distinct company_id) company_cnt,
+    SELECT segment_id,CONCAT(dep_city,'-',arv_city) seg,SUBSTRING(dep_time,1,2) as time_value,count(distinct flight_no)flts_cnt,count(distinct company_id) company_cnt,
     (SELECT concat(company_name,':',price) FROM v_price_overview where segment_id=t.segment_id and flight_date=t.flight_date and price_type1=t.price_type1 and SUBSTRING(dep_time,1,2)=SUBSTRING(t.dep_time,1,2) order by price limit 1) as mkt_min,
     (SELECT concat(company_name,':',price) FROM v_price_overview where segment_id=t.segment_id and flight_date=t.flight_date and price_type1=t.price_type1 and SUBSTRING(dep_time,1,2)=SUBSTRING(t.dep_time,1,2) order by price desc limit 1) as mkt_max,
     (SELECT flight_no FROM v_price_overview where segment_id=t.segment_id and flight_date=t.flight_date and price_type1=t.price_type1 and SUBSTRING(dep_time,1,2)=SUBSTRING(t.dep_time,1,2) and company_name='祥鹏航空' order by price limit 1) as 8l_flt,
@@ -50,7 +59,7 @@ def analysis_overview_query():
     where segment_id=%s 
     and flight_date='%s' 
     and price_type1='%s'
-    group by CONCAT(dep_city,'-',arv_city),SUBSTRING(dep_time,1,2)
+    group by segment_id,CONCAT(dep_city,'-',arv_city),SUBSTRING(dep_time,1,2)
     order by SUBSTRING(dep_time,1,2)
     ''' % (segment_id, flight_date, price_type1)
 
@@ -66,8 +75,8 @@ def analysis_overview_query():
     rs_timeinfo = db.session.execute(time_sql).fetchall()
 
     rs_data_list = []
-    col_list = ['segment', 'time_range', 'flt_cnt', 'company_cnt', 'mkt_min', 'mkt_max', '8L_flt', '8L_time',
-                '8L_price']
+    col_list = ['segment_id', 'segment', 'time_range', 'flt_cnt', 'company_cnt', 'mkt_min', 'mkt_max', '8L_flt',
+                '8L_time', '8L_price']
     for row in rs_data:
         rs_data_list.append(dict(zip(col_list, row)))
 
