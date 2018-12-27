@@ -147,5 +147,5 @@ class Option(db.Model):
         # set how many days after current date the crawler will search for
         crawler_days = Option(name='crawler_days', value=7)
 
-        db.session.add_all(interval, use_proxy, crawler_days)
+        db.session.add_all([interval, use_proxy, crawler_days])
         db.session.commit()
