@@ -20,4 +20,4 @@ SELECT company_id,company_name,segment_id,dep_city,arv_city,flight_no,flight_dat
 ,min(price) as price
 FROM
 v_price_details
-group by company_id,company_name,segment_id,dep_city,arv_city,flight_no,flight_date,dep_time,arv_time,price_type1_alias
+group by company_id,company_name,segment_id,dep_city,arv_city,flight_no,flight_date,dep_time,arv_time,price_type1_alias;

@@ -93,9 +93,84 @@ def analysis_detail_query():
     segment_id = request.args.get('segment_id', None, type=int)
     flight_date = request.args.get('flight_date', None, type=str)
     time_range = request.args.get('time_range', None, type=str)
-    price_type1 = request.args.get('price_type1', None, type=str)
-    # to do:complete thie view
-    return 'To be developed'
+    price_type = request.args.get('price_type', None, type=str)
+
+    if not (segment_id and flight_date and price_type):
+        return jsonify(message='Invalid parameters..'), 400
+    if not (re.match(r'\d{4}-\d{2}-\d{2}', flight_date)):
+        return jsonify(message='Invalid parameters..'), 400
+    if not (isinstance(segment_id, int)):
+        return jsonify(message='Invalid parameters..'), 400
+    if not (price_type in ('economy', 'member', 'luxury')):
+        return jsonify(message='Invalid parameters..'), 400
+    if not 24 >= int(time_range) >= 0:
+        return jsonify(message='Invalid parameters..'), 400
+
+    sql = '''
+    SELECT
+        CONCAT(dep_city, '-', arv_city) AS segment,
+    company_name,
+    dep_airport,
+    arv_airport,
+    flight_no,
+    flight_date,
+    CONCAT(dep_time, '-', arv_time) AS dep_time,
+    flight_time,
+    is_direct,
+    transfer_city,
+    is_shared,
+    share_company,
+    share_flight_no,
+    price_type1_alias,
+    price_type1,
+    max(get_time) AS get_time,
+    group_concat(
+      CONCAT_WS(
+        '|',
+      price_type2,
+      price,
+      discount
+      )
+    ) AS detail_info
+    FROM
+      v_price_details
+    WHERE
+      segment_id = %s
+    AND price_type1_alias = '%s'
+    AND flight_date = '%s'
+    AND SUBSTRING(dep_time, 1, 2) = '%s'
+    GROUP BY
+    CONCAT(dep_city, '-', arv_city),
+    company_name,
+    dep_airport,
+    arv_airport,
+    flight_no,
+    flight_date,
+    CONCAT(dep_time, '-', arv_time),
+    flight_time,
+    is_direct,
+    transfer_city,
+    is_shared,
+    share_company,
+    share_flight_no,
+    price_type1_alias,
+    price_type1''' % (segment_id, price_type, flight_date, time_range)
+
+    l1 = ['price_class2', 'price_value', 'discount']
+    l2 = ['segment', 'company_name', 'dep_airport', 'arv_airport', 'flight_no',
+          'flight_date', 'dep_time', 'flight_time', 'is_direct', 'transfer_city',
+          'is_shared', 'share_company', 'share_flight_no', 'price_type', 'price_type1', 'get_time']
+    rs_data = db.session.execute(sql).fetchall()
+    rs_data_list = {'data': [], 'total': 0}
+    for row in rs_data:
+        l = []
+        for i in row[16].split(','):
+            l.append(dict(zip(l1, i.split('|'))))
+        row = dict(zip(l2, row[:15]))
+        row['price_info'] = l
+        rs_data_list['data'].append(row)
+    rs_data_list['total'] = rs_data_list['data'].__len__()
+    return jsonify(rs_data_list), 200
 
 
 @main_bp.route('/analysis/custom')
