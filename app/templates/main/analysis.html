@@ -20,9 +20,10 @@
     font-size: 5px;
 }
 </style>
-<h4>爬虫管理</h4>
+<h4>数据分析</h4>
 <HR>
 <form>
+
 <div class="row offset-md-1">
     <div class = "col-sm-3" id="content">
 
@@ -35,24 +36,30 @@
     </div>
     <div class = " col-sm-3">
     <label class = " mark col-sm-3">航班日期:</label>
-    <input class = "form-control col-sm-6" name="entryDate" placeholder="请选择航班日期" id="blrz-entry-date-start" type="text" >
+    <input class = "form-control col-sm-6" name="flightDate"  placeholder="请选择航班日期" id="blrz-entry-date-start" type="text" >
     </div>
 
     <div class = " col-sm-4">
         <label class = "mark col-sm-1" >航段:</label>
-        <select class="form-control col-sm-4" id="Passage">
+        <select class="form-control col-sm-4" placeholder  = "请选择航段" id="segment">
         </select>
-        <label class = "mark col-sm-2" >时间段:</label>
-        <select class="form-control col-sm-4" id="timearea">
-        </select>
+
     </div>
+
+     <button type="button" class="btn btn-success" onclick = "generatebtn()">筛选</button>
 </div>
 </form>
 
 <HR>
-<button type="button" class="btn btn-light"><i class ="fa fa-angle-left"> 前一周</i></button>
-<button type="button" class="btn btn-light">后一周 <i class ="fa fa-angle-right"></i></button>
 <div class="row">
+<button type="button" class="btn btn-light" onclick="lastWeek()"><i class ="fa fa-angle-left"> 前一周</i></button>
+
+<div class="btn-group" id = "flight-date">
+
+  </div>
+
+<button type="button" class="btn btn-light" onclick="nextWeek()">后一周 <i class ="fa fa-angle-right"></i></button>
+</div>
 
 
 {% endblock %}
@@ -78,6 +85,94 @@
 
          forceParse: 0
      });
+
+       $.ajax({
+                url: "{{url_for('main.analysis_segments')}}",
+                data: {
+
+                },
+                dataType: "json",
+                type: "GET",
+                success: function (res) {
+                    if (res != null && res != "") { // 注册成功
+                        var segmenthtml = "";
+                      for (var i = 0;i<res.length;i++){
+                          segmenthtml += "<option value='" + res[i].id + "'>"+res[i].dep_city+"-"+res[i].arv_city+"</option>";
+
+                      }
+                      $("#segment").append(segmenthtml);
+                    }
+                },
+                fail: function (err) {
+                    alert("error！");
+                }
+
+            });
+
  });
+
+ function  generatebtn(){
+     var flightdateStr = $("#blrz-entry-date-start").val();
+     var flightdate = new Date(flightdateStr);
+     $("#flight-date").empty();
+     flightdate.setDate(flightdate.getDate() - 4);
+     if(flightdate!=null){
+         var html = "";
+         for(var i= 0;i<7;i++){
+           var  newflightdate =  flightdate;
+           newflightdate.setDate(flightdate.getDate() + 1);
+           var newflightdateStr = transform(newflightdate);
+           html +=
+             "    <button type=\"button\" id= '"+i+"-btn"+"'   class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+         }
+         $("#flight-date").append(html);
+
+
+     }
+ }
+
+ function  lastWeek(){
+     var buttonValue= document.getElementById('3-btn').innerHTML;
+     var flightdate = new Date(buttonValue);
+     $("#flight-date").empty();
+     flightdate.setDate(flightdate.getDate() - 7);
+      var html = "";
+         for(var i= 0;i<7;i++){
+           var  newflightdate =  flightdate;
+           newflightdate.setDate(flightdate.getDate() + 1);
+           var newflightdateStr = transform(newflightdate);
+           html +=
+            "    <button type=\"button\" id= '"+i+"-btn"+"'   class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+         }
+         $("#flight-date").append(html);
+
+ }
+
+ function  nextWeek(){
+     var buttonValue= document.getElementById('3-btn').innerHTML;
+     var flightdate = new Date(buttonValue);
+     $("#flight-date").empty();
+     flightdate.setDate(flightdate.getDate() - 1);
+      var html = "";
+         for(var i= 0;i<7;i++){
+           var  newflightdate =  flightdate;
+           newflightdate.setDate(flightdate.getDate() + 1);
+           var newflightdateStr = transform(newflightdate);
+           html +=
+            "    <button type=\"button\" id= '"+i+"-btn"+"'   class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+         }
+         $("#flight-date").append(html);
+
+ }
+
+ function transform(date){
+     var str = date.getFullYear() + '-'
+    + (parseInt(date.getMonth()) + 1) + '-'
+    + date.getDate();
+
+     return str;
+ }
+
+
 </script>
 {% endblock %}
