@@ -157,17 +157,17 @@ def analysis_detail_query():
     price_type1_alias,
     price_type1''' % (segment_id, price_type, flight_date, time_range)
 
-    l1 = ['price_class2', 'price_value', 'discount']
-    l2 = ['segment', 'company_name', 'dep_airport', 'arv_airport', 'flight_no',
-          'flight_date', 'dep_time', 'flight_time', 'is_direct', 'transfer_city',
-          'is_shared', 'share_company', 'share_flight_no', 'price_type', 'price_type1', 'get_time']
+    col_l1 = ['price_class2', 'price_value', 'discount']
+    col_l2 = ['segment', 'company_name', 'dep_airport', 'arv_airport', 'flight_no',
+              'flight_date', 'dep_time', 'flight_time', 'is_direct', 'transfer_city',
+              'is_shared', 'share_company', 'share_flight_no', 'price_type', 'price_type1', 'get_time']
     rs_data = db.session.execute(sql).fetchall()
     rs_data_list = {'data': [], 'total': 0}
     for row in rs_data:
         l = []
         for i in row[16].split(','):
-            l.append(dict(zip(l1, i.split('|'))))
-        row = dict(zip(l2, row[:15]))
+            l.append(dict(zip(col_l1, i.split('|'))))
+        row = dict(zip(col_l2, row[:15]))
         row['price_info'] = l
         rs_data_list['data'].append(row)
     rs_data_list['total'] = rs_data_list['data'].__len__()
@@ -193,7 +193,7 @@ def crawler_logs():
     logs = pagination.items
     logs_list = [i.to_json() for i in logs]
     result = {'total': pagination.total, 'pages': pagination.pages, 'page': pagination.page,
-              'per_page': pagination.per_page, 'segments': logs_list}
+              'per_page': pagination.per_page, 'logs': logs_list}
     return jsonify(result), 200
 
 
@@ -209,4 +209,12 @@ def crawler_statistics():
     data = db.session.execute(sql).fetchall()
     col_name = ['company_name', 'flight_date', 'flt_counts', 'total']
     result = [dict(zip(col_name, i)) for i in data]
+    return jsonify(result), 200
+
+
+@main_bp.route('/crawler/statistics/test')
+@login_required
+def crawler_statistics_test():
+    result = [{'name': '类别1', 'num': 10}, {'name': '类别2', 'num': 20}, {'name': '类别3', 'num': 30},
+              {'name': '类别4', 'num': 30}, {'name': '类别5', 'num': 40}]
     return jsonify(result), 200

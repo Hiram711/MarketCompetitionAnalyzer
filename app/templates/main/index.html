@@ -1,11 +1,196 @@
 {% extends "base/layout.html" %}
+{% block styles %}
+{{super()}}
+<link href="https://cdn.bootcss.com/octicons/4.4.0/font/octicons.css" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='css/jqgrid/ui.jqgrid-bootstrap4.css')}}">
+{% endblock %}
 {% block content %}
 <div class="col-md-4 offset-md-4">
     {% include 'base/msg.html' %}
 </div>
-<div>
-    Welcome to our world!
-</div>
+<div class="row" style="margin-top: 5%;">
+    <div class="col-md-5" id="graphic">
 
+    </div>
+    <div class="col-md-7">
+        <div id="mysearch"></div>
+        <table id="grid"></table>
+        <div id="gridpager"></div>
+    </div>
+</div>
 {% endblock %}
 
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='js/jquery-ui/jquery-ui.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/grid.locale-cn.js')}}"></script>
+<script src="{{url_for('static', filename='js/jqgird/jquery.jqGrid.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/echarts/echarts.common.min.js')}}"></script>
+<script>
+    $(document).ready(function () {
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader('X-CSRFToken', "{{ csrf_token() }}");
+                }
+            }
+        });
+
+        var default_error_message = "Oops, something was wrong!";
+        $(document).ajaxError(function (event, request) {
+            var message = null;
+
+            if (request.responseJSON && request.responseJSON.hasOwnProperty('message')) {
+                message = request.responseJSON.message;
+            } else if (request.responseText) {
+                var IS_JSON = true;
+                try {
+                    var data = JSON.parse(request.responseText);
+                }
+                catch (err) {
+                    IS_JSON = false;
+                }
+
+                if (IS_JSON && data !== undefined && data.hasOwnProperty('message')) {
+                    message = JSON.parse(request.responseText).message;
+                } else {
+                    message = default_error_message;
+                }
+            } else {
+                message = default_error_message;
+            }
+            alert(message);
+        });
+
+        $("#grid").jqGrid({
+            styleUI: 'Bootstrap4',
+            iconSet: "Octicons",
+            responsive: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 10,
+            rowList: [10, 20, 30],
+            //height: "100%",
+            height: 300,
+            autowidth: false,
+            pager: '#gridpager',
+            sortname: 'id',
+            sortorder: "asc",
+            viewrecords: true,
+            caption: "爬虫运行日志",
+            url: "{{url_for('main.crawler_logs')}}",
+            datatype: "json",
+            mtype: 'GET',
+            colModel:
+                [
+                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', sortable: false, width: '50%'},
+                    {
+                        label: '公司名称',
+                        name: 'company_name',
+                        index: 'company_name',
+                        align: 'center',
+                        sortable: false,
+                        width: '90%'
+                    },
+                    {label: '航段', name: 'segment', index: 'segment', align: 'center', sortable: false, width: '90%'},
+                    {
+                        label: '航班日期',
+                        name: 'flight_date',
+                        index: 'flight_date',
+                        align: 'center',
+                        sortable: false,
+                        width: '97%'
+                    },
+                    {
+                        label: '开始运行时间',
+                        name: 'begin_date',
+                        index: 'begin_date',
+                        align: 'left',
+                        sortable: false,
+                        width: '160%'
+                    },
+                    {
+                        label: '结束运行时间',
+                        name: 'end_date',
+                        index: 'end_date',
+                        align: 'left',
+                        sortable: false,
+                        width: '160%'
+                    },
+                    {label: '运行状态', name: 'status', index: 'status', align: 'center', sortable: false, width: '85%'},
+                    {label: '数据量', name: 'rowcnt', index: 'rowcnt', align: 'center', sortable: false, width: '70%'},
+                ],
+            jsonReader: {
+                root: "logs", // json中代表实际模型数据的入口
+                records: "total", // json中代表数据行总数的数据
+                page: "page", // json中代表当前页码的数据
+                total: "pages", // json中代表页码总数的数据
+                repeatitems: false
+            }
+        });
+        $("#grid").navGrid('#gridpager', {edit: false, add: false, del: false, search: false}, {}, {}, {}, {});
+
+        var myChart = echarts.init(document.getElementById('graphic'));
+        // 显示标题，图例和空的坐标轴
+        myChart.setOption({
+            title: {
+                text: '异步数据加载示例'
+            },
+            tooltip: {},
+            legend: {
+                data: ['销量']
+            },
+            xAxis: {
+                data: []
+            },
+            yAxis: {},
+            series: [{
+                name: '销量',
+                type: 'bar',
+                data: []
+            }]
+        });
+
+        myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+
+        var names = [];    //类别数组（实际用来盛放X轴坐标值）
+        var nums = [];    //销量数组（实际用来盛放Y坐标值）
+
+        $.ajax({
+            type: "get",
+            async: true,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+            url: "{{url_for('main.crawler_statistics_test')}}",  //请求发送到TestServlet处
+            data: {},
+            dataType: "json",        //返回数据形式为json
+            success: function (result) {
+                //请求成功时执行该函数内容，result即为服务器返回的json对象
+                if (result) {
+                    for (var i = 0; i < result.length; i++) {
+                        names.push(result[i].name);    //挨个取出类别并填入类别数组
+                    }
+                    for (var i = 0; i < result.length; i++) {
+                        nums.push(result[i].num);    //挨个取出销量并填入销量数组
+                    }
+                    myChart.hideLoading();    //隐藏加载动画
+                    myChart.setOption({        //加载数据图表
+                        xAxis: {
+                            data: names
+                        },
+                        series: [{
+                            // 根据名字对应到相应的系列
+                            name: '销量',
+                            data: nums
+                        }]
+                    });
+
+                }
+
+            },
+            error: function (errorMsg) {
+                //请求失败时执行该函数
+                myChart.hideLoading();
+            }
+        })
+    });
+</script>
+{% endblock %}

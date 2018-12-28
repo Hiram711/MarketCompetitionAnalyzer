@@ -24,10 +24,10 @@ class CrawlerLog(db.Model):
     def to_json(self):
         return {'id': self.id,
                 'company_name': self.company.company_name,
-                'segment': '-'.join(self.segment.dep_city, self.segment.arv_city),
+                'segment': '-'.join([self.segment.dep_city, self.segment.arv_city]),
                 'flight_date': self.flight_date.strftime('%Y-%m-%d'),
-                'begin_date': self.create_time.strftime('%Y-%m-%d %H:%M:%S'),
-                'end_date': self.modify_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'begin_date': None if self.begin_date is None else self.begin_date.strftime('%Y-%m-%d %H:%M:%S'),
+                'end_date': None if self.end_date is None else self.end_date.strftime('%Y-%m-%d %H:%M:%S'),
                 'status': self.status, 'rowcnt': self.rowcnt}
 
 
