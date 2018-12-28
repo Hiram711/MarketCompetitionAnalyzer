@@ -21,6 +21,15 @@ class CrawlerLog(db.Model):
     rowcnt = db.Column(db.Integer)
     details = db.Column(db.Text)
 
+    def to_json(self):
+        return {'id': self.id,
+                'company_name': self.company.company_name,
+                'segment': '-'.join(self.segment.dep_city, self.segment.arv_city),
+                'flight_date': self.flight_date.strftime('%Y-%m-%d'),
+                'begin_date': self.create_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'end_date': self.modify_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'status': self.status, 'rowcnt': self.rowcnt}
+
 
 class Company(db.Model):
     __tablename__ = 'companies'

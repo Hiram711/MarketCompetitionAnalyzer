@@ -2,12 +2,13 @@
 # -*- coding:utf-8 -*-
 __author__ = 'Hiram Zhang'
 import re
+from datetime import datetime
 
 from flask import Blueprint, render_template, jsonify, request
 from flask_login import login_required
 
 from app.extensions.flasksqlalchemy import db
-from app.models.cralwer import Segment
+from app.models.cralwer import Segment, CrawlerLog
 
 main_bp = Blueprint('main', __name__)
 
@@ -177,3 +178,35 @@ def analysis_detail_query():
 @login_required
 def analysis_custom_index():
     return 'To be developed'
+
+
+@main_bp.route('/crawler/log')
+@login_required
+def crawler_logs():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('rows', 10, type=int)
+    today = datetime.now().date()
+    pagination = CrawlerLog.query. \
+        filter(CrawlerLog.begin_date >= today). \
+        order_by(CrawlerLog.id.desc()). \
+        paginate(page, per_page)
+    logs = pagination.items
+    logs_list = [i.to_json() for i in logs]
+    result = {'total': pagination.total, 'pages': pagination.pages, 'page': pagination.page,
+              'per_page': pagination.per_page, 'segments': logs_list}
+    return jsonify(result), 200
+
+
+@main_bp.route('/crawler/statistics')
+@login_required
+def crawler_statistics():
+    sql = '''
+    SELECT  company_name,flight_date,count(distinct flight_no) as flt_cnt,count(*) as total
+    FROM v_price_details 
+    where flight_date>=CURDATE() and flight_date<DATE_ADD(CURDATE(),INTERVAL  7 DAY)
+    group by company_name,flight_date
+    '''
+    data = db.session.execute(sql).fetchall()
+    col_name = ['company_name', 'flight_date', 'flt_counts', 'total']
+    result = [dict(zip(col_name, i)) for i in data]
+    return jsonify(result), 200
