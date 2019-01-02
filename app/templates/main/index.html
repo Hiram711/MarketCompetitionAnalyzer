@@ -198,7 +198,15 @@
                             'label': {
                                 'normal': {
                                     'show': true,
-                                    'position': 'insideRight'
+                                    'position': 'insideRight',
+                                    'formatter': function (params) {
+                                        if (params.value > 0) {
+                                            return params.value;
+                                        }
+                                        else {
+                                            return '';
+                                        }
+                                    }
                                 }
                             },
                             'data': result[i].data
