@@ -3,6 +3,7 @@
 __author__ = 'Hiram Zhang'
 
 import re
+import os
 from datetime import datetime, timedelta
 
 from sqlalchemy import create_engine, MetaData
@@ -228,7 +229,9 @@ def task_KY(db_url, add_days=7, use_proxy=False):
                     # result= data_grabber_mu(segment.dep_city,segment.arv_city,flight_date=query_date,proxy=proxy)
                     result = data_grabber_ky(segment.dep_city, segment.arv_city, flight_date=query_date, proxy=proxy)
                     # print('get result:', result)
+                    rowCount = 0
                     for row in result:
+                        rowCount += len(row['price_list'])
                         for subrow in row['price_list']:
                             dt = PriceDetail()
                             dt.get_time = get_time
@@ -260,7 +263,7 @@ def task_KY(db_url, add_days=7, use_proxy=False):
                             session.add(dt)
                             session.commit()
                     log.status = 'Success'
-                    log.rowcnt = len(result)
+                    log.rowcnt = rowCount
                 except Exception as e:
                     log.details = str(e)
                     log.status = 'Failed'
@@ -276,4 +279,5 @@ def task_KY(db_url, add_days=7, use_proxy=False):
 
 
 if __name__ == '__main__':
-    task_MU(db_url='sqlite:///C:\\Users\\jie.zhang8\\Desktop\\MarketCompetitionAnalyzer\\data-dev.db', add_days=1)
+    task_KY(db_url=os.getenv('DATABASE_URI'), add_days=1)
+    print(os.getenv('DATABASE_URI'))
