@@ -276,7 +276,4 @@ def task_KY(db_url, add_days=7, use_proxy=False):
 
 
 if __name__ == '__main__':
-    # task_MU(db_url='sqlite:///C:\\Users\\jie.zhang8\\Desktop\\MarketCompetitionAnalyzer\\data-dev.db', add_days=1)
-    # task_MU(db_url='mysql+pymysql://mktc_user:$[1f*b3z)S@10.42.1.76:6612/mktc?charset=utf8', add_days=1)
-    # task_8L(db_url='mysql+pymysql://mktc_user:$[1f*b3z)S@10.42.1.76:6612/mktc?charset=utf8', add_days=1)
-    task_KY(db_url='mysql+pymysql://mktc_user:$[1f*b3z)S@10.42.1.76:6612/mktc?charset=utf8', add_days=1)
+    task_MU(db_url='sqlite:///C:\\Users\\jie.zhang8\\Desktop\\MarketCompetitionAnalyzer\\data-dev.db', add_days=1)

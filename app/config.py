@@ -4,9 +4,7 @@ __author__ = 'Hiram Zhang'
 
 import os
 import sys
-
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-
 from app.crawlers.tasks import task_MU, task_8L, task_KY
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))

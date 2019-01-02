@@ -108,7 +108,7 @@ def data_grabber_ky(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
         # summary info
         dpt = flt.find_all(class_='tt-de-a2')[1].find_all('p')[1].text.strip()
         dptTime = flt.find_all(class_='tt-de-a2')[1].find('strong').text.strip()
-        mid = ''
+        mid = ''  # 没有经停航线
         is_direct = flt.find_all(class_='tt-de-a3')[0].find_all('p')[1].text.strip().replace('-', '')
         arrv = flt.find_all(class_='tt-de-a2')[2].find_all('p')[1].text.strip()
         arvTime = flt.find_all(class_='tt-de-a2')[2].find('strong').text.strip().replace('\n', '').replace(' ', '')
