@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.crawlers.data_grabber_8L import data_grabber_8l
 from app.crawlers.data_grabber_MU import data_grabber_mu
+from app.crawlers.data_grabber_KY import data_grabber_ky
 from app.utils import get_rnd_proxy
 
 
@@ -186,6 +187,93 @@ def task_8L(db_url, add_days=7, use_proxy=False):
         session.close()
 
 
+# make data cleaned and recorded
+def task_KY(db_url, add_days=7, use_proxy=False):
+    try:
+        # create a new data connection using reflection,
+        # in this way we can avoid using app context and the fun can run independently
+        engine = create_engine(db_url)
+        metadata = MetaData()
+        metadata.reflect(engine, only=['crawler_logs', 'companies', 'segments', 'price_details', 'prices'])
+        Base = automap_base(metadata=metadata)
+        Base.prepare()
+        CrawlerLog, Company, Segment, PriceDetail, Price = Base.classes.crawler_logs, Base.classes.companies, \
+                                                           Base.classes.segments, Base.classes.price_details, \
+                                                           Base.classes.prices
+
+        session = Session(engine)
+        company = session.query(Company).filter_by(prefix='KY').first()
+        segments = session.query(Segment).all()
+        begin_date = datetime.now()
+        # re_time = re.compile(r'\d{2}:\d{2}')
+        # re_discount = re.compile(r'.*折')
+        # re_price = re.compile('[0-9.,]+')
+        for segment in segments:
+            for i in range(add_days):
+                query_date = (begin_date + timedelta(days=i)).strftime('%Y-%m-%d')
+                proxy = None
+                if use_proxy:
+                    proxy = get_rnd_proxy()
+                log = CrawlerLog()
+                log.status = 'Running'
+                log.company_id = company.id
+                log.segment_id = segment.id
+                get_time = datetime.now()
+                log.begin_date = get_time
+                log.flight_date = (begin_date + timedelta(days=i)).date()
+                session.add(log)
+                session.commit()
+                log = session.query(CrawlerLog).get(log.id)
+                try:
+                    # result= data_grabber_mu(segment.dep_city,segment.arv_city,flight_date=query_date,proxy=proxy)
+                    result = data_grabber_ky(segment.dep_city, segment.arv_city, flight_date=query_date, proxy=proxy)
+                    # print('get result:', result)
+                    for row in result:
+                        for subrow in row['price_list']:
+                            dt = PriceDetail()
+                            dt.get_time = get_time
+                            dt.company_id = company.id
+                            dt.segment_id = segment.id
+                            dt.dep_time = row['dptTime'].strip()
+                            dt.dep_airport = row['dpt'].strip()
+                            dt.arv_time = row['arvTime'].strip()
+                            dt.arv_airport = row['arrv'].strip()
+                            dt.flight_no = row['fltno'].strip()
+                            dt.flight_date = (begin_date + timedelta(days=i)).date()
+                            dt.airplane_type = row['airplane_type'].strip()
+                            dt.flight_time = row['flt_tm'].strip()
+                            if row['is_direct'] == '经停':
+                                dt.is_direct = False
+                            elif row['is_direct'] == '直飞':
+                                dt.is_direct = True
+                            dt.transfer_city = row['mid'].strip()
+                            if row['company'] != '昆明航空':
+                                dt.is_shared = True
+                                dt.share_company = row['company'].strip()
+                                dt.share_flight_no = row['fltno'].strip()
+                            # price detail
+                            dt.price_type1 = subrow[0]
+                            dt.price_type2 = subrow[1]
+                            dt.discount = int(subrow[2])/100
+                            dt.price = subrow[3]
+
+                            session.add(dt)
+                            session.commit()
+                    log.status = 'Success'
+                    log.rowcnt = len(result)
+                except Exception as e:
+                    log.details = str(e)
+                    log.status = 'Failed'
+                    print('failed:', segment.__dict__, e)
+                finally:
+                    log.end_date = datetime.now()
+                session.add(log)
+                session.commit()
+    except Exception as e:
+        print(e)
+    finally:
+        session.close()
+
+
 if __name__ == '__main__':
-    # task_MU(db_url='sqlite:///C:\\Users\\jie.zhang8\\Desktop\\MarketCompetitionAnalyzer\\data-dev.db', add_days=1)
-    task_8L(db_url='sqlite:///C:\\Users\\jie.zhang8\\Desktop\\MarketCompetitionAnalyzer\\data-dev.db', add_days=1)
+    task_MU(db_url='sqlite:///C:\\Users\\jie.zhang8\\Desktop\\MarketCompetitionAnalyzer\\data-dev.db', add_days=1)
