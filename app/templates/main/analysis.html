@@ -19,40 +19,63 @@
 .btn btn-light{
     font-size: 5px;
 }
+.btn-group{
+    text-align:center;
+    padding-left: 60px;
+}
 </style>
-<h4>爬虫管理</h4>
+<h4>数据分析</h4>
 <HR>
 <form>
-<div class="row offset-md-1">
-    <div class = "col-sm-3" id="content">
 
-            <label class = "mark col-sm-3">对比内容:</label>
-            <label class="col-sm-4 radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
-                                                                          value="economic">经济舱</label>
-            <label class="col-sm-4 radio-inline" style="padding-left: 10px"><input type="radio"  name="optradio"
-                                                                          value="firstclass">头等舱</label>
+<div class="row offset-md-1">
+    <div class = "col-sm-5" id="content">
+
+            <label class = "mark col-sm-2">类型:</label>
+            <label class="col-sm-2 radio-inline" style="padding-left: 10px"><input type="radio" name="optradio"
+                                                                          value="economy">经济舱</label>
+            <label class="col-sm-2 radio-inline" style="padding-left: 10px"><input type="radio"  name="optradio"
+                                                                          value="member">会员价</label>
+        <label class="col-sm-=2 radio-inline" style="padding-left: 10px"><input type="radio"  name="optradio"
+                                                                          value="luxury">头等舱</label>
 
     </div>
     <div class = " col-sm-3">
     <label class = " mark col-sm-3">航班日期:</label>
-    <input class = "form-control col-sm-6" name="entryDate" placeholder="请选择航班日期" id="blrz-entry-date-start" type="text" >
+    <input class = "form-control col-sm-6" name="flightDate"  placeholder="请选择航班日期" id="blrz-entry-date-start" type="text" >
     </div>
 
     <div class = " col-sm-4">
         <label class = "mark col-sm-1" >航段:</label>
-        <select class="form-control col-sm-4" id="Passage">
+        <select class="form-control col-sm-4" placeholder  = "请选择航段" id="segment">
         </select>
-        <label class = "mark col-sm-2" >时间段:</label>
-        <select class="form-control col-sm-4" id="timearea">
-        </select>
+
+            <button type="button" style="float:right" class="btn btn-success" onclick = "generatebtn()">筛选</button>
+
     </div>
+
+
 </div>
+
 </form>
 
 <HR>
-<button type="button" class="btn btn-light"><i class ="fa fa-angle-left"> 前一周</i></button>
-<button type="button" class="btn btn-light">后一周 <i class ="fa fa-angle-right"></i></button>
+<div class="row offset-md-2">
+<button type="button" class="btn btn-light" style="float:left" onclick="lastWeek()"><i class ="fa fa-angle-left"> 前一周</i></button>
+
+<div class="btn-group col-sm-8"  id = "flight-date">
+
+  </div>
+
+<button type="button" class="btn btn-light"style="float:right" onclick="nextWeek()">后一周 <i class ="fa fa-angle-right"></i></button>
+</div>
+
 <div class="row">
+    <div class="col-md-10 offset-md-1">
+        <table id="flightData"></table>
+        <div id="gridpager"></div>
+    </div>
+</div>
 
 
 {% endblock %}
@@ -66,7 +89,86 @@
 <script src="{{url_for('static', filename='js/datetimepicker/bootstrap-datetimepicker.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/datetimepicker/bootstrap-datetimepicker.zh-CN.js')}}"></script>
 <script>
+    var gloablflightdate = "";
+     var globalpricetype = "";
+      var globalsegmentid = "";
  $(document).ready(function () {
+
+     $("#flightData").jqGrid({
+            styleUI: 'Bootstrap4',
+            iconSet: "Octicons",
+            responsive: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 10,
+            rowList: [10, 20, 30],
+            height: "100%",
+            //height: 300,
+            autowidth: true,
+            pager: '#gridpager',
+            sortname: 'id',
+            sortorder: "asc",
+            viewrecords: true,
+            caption: "数据分析比对",
+            datatype: "json",
+            mtype: 'GET',
+            colModel:
+                [
+                    {label: '时刻', name: 'segment_id', index: 'segment_id', align: 'center', editable: true, search: true},
+                    {label: '时刻分组', name: 'time_range', index: 'time_range', align: 'center', editable: true, search: true},
+                    {label: '航段', name: 'segment', index: 'segment', align: 'center', editable: true, search: true},
+                    {label: '祥鹏航班时刻 ', name: '8L_time', index: '8L_time', align: 'center', editable: true, search: true,
+                        formatter: function (cellvalue) {
+                             if(cellvalue =="" || cellvalue == null){
+                                 return "-";
+                             }else{
+                                 return cellvalue;
+                             }
+                        }
+                    },
+                    {label: '祥鹏航班号 ', name: '8L_flt', index: 'flt_cnt', align: 'center', editable: true, search: true,
+                    formatter: function (cellvalue) {
+                             if(cellvalue =="" || cellvalue == null){
+                                 return "-";
+                             }else{
+                                 return cellvalue;
+                             }
+                        }
+                        },
+                    {label: '祥鹏票价', name: '8L_price', index: '8L_price', align: 'center', editable: true, search: true,
+                    formatter: function (cellvalue) {
+                             if(cellvalue =="" || cellvalue == null){
+                                 return "-";
+                             }else{
+                                 return cellvalue;
+                             }
+                        }
+                    },
+                    {label: '市场最低票价', name: 'mkt_min', index: 'mkt_min', align: 'center', editable: true, search: true},
+                    {label: '市场最高票价', name: 'mkt_max', index: 'mkt_max', align: 'center', editable: true, search: true},
+                    {label: '竞争航班总数', name: 'company_cnt', index: 'company_cnt', align: 'center', editable: true, search: true},
+                    {
+                    label: '详情', name: 'operate', index: 'operate',  align: 'center',
+                    formatter: function (cellvalue, options, rowObject) {
+                        var datas = new Array();
+                        var detail="<button onclick='btn_detail(\""+ rowObject.time_range+ "\")''   class=\"btn btn-success\"  >详情</buttom>";
+                        return detail;
+                    },
+                },
+                ],
+            jsonReader: {
+                root: "data", // json中代表实际模型数据的入口
+                records: "total", // json中代表数据行总数的数据
+                page: "page", // json中代表当前页码的数据
+                total: "pages", // json中代表页码总数的数据
+                repeatitems: false
+            }
+        });
+        $("#flightData").navGrid('#gridpager', {edit: false, add: true, del: false}, {}, {}, {}, {
+            sopt: ['eq'],
+            multipleSearch: true
+        });
+
      $("#blrz-entry-date-start").datetimepicker({//选择年月日
          format: 'yyyy-mm-dd',
          language: 'zh-CN',
@@ -78,6 +180,146 @@
 
          forceParse: 0
      });
+
+       $.ajax({
+                url: "{{url_for('main.analysis_segments')}}",
+                data: {
+
+                },
+                dataType: "json",
+                type: "GET",
+                success: function (res) {
+                    if (res != null && res != "") { // 注册成功
+                        var segmenthtml = "";
+                      for (var i = 0;i<res.length;i++){
+                          segmenthtml += "<option value='" + res[i].id + "'>"+res[i].dep_city+"-"+res[i].arv_city+"</option>";
+
+                      }
+                      $("#segment").append(segmenthtml);
+                    }
+                },
+                fail: function (err) {
+                    alert("error！");
+                }
+
+            });
+
  });
+
+ function  generatebtn(){
+
+     var flightdateStr = $("#blrz-entry-date-start").val();
+     var flightdate = new Date(flightdateStr);
+     $("#flight-date").empty();
+     if(flightdateStr = null || flightdateStr==""){
+          alert("请选择日期！");
+          return;
+
+     }
+     flightdate.setDate(flightdate.getDate() - 4);
+     if(flightdate!=null){
+         var html = "";
+         for(var i= 0;i<7;i++){
+           var  newflightdate =  flightdate;
+           newflightdate.setDate(flightdate.getDate() + 1);
+           var newflightdateStr = transform(newflightdate);
+           html +=
+             "    <button type=\"button\" id= '"+i+"-btn"+"'onclick=\"showData(\'"+newflightdateStr+"\')\"  class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+         }
+         $("#flight-date").append(html);
+
+
+     }
+ }
+
+ function  lastWeek(){
+     var buttonValue= document.getElementById('3-btn').innerHTML;
+     var flightdate = new Date(buttonValue);
+     $("#flight-date").empty();
+     flightdate.setDate(flightdate.getDate() - 7);
+      var html = "";
+         for(var i= 0;i<7;i++){
+           var  newflightdate =  flightdate;
+           newflightdate.setDate(flightdate.getDate() + 1);
+           var newflightdateStr = transform(newflightdate);
+           html +=
+           "    <button type=\"button\" id= '"+i+"-btn"+"'onclick=\"showData(\'"+newflightdateStr+"\')\"  class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+         }
+         $("#flight-date").append(html);
+
+ }
+
+ function  nextWeek(){
+     var buttonValue= document.getElementById('3-btn').innerHTML;
+     var flightdate = new Date(buttonValue);
+     $("#flight-date").empty();
+     flightdate.setDate(flightdate.getDate() - 1);
+      var html = "";
+         for(var i= 0;i<7;i++){
+           var  newflightdate =  flightdate;
+           newflightdate.setDate(flightdate.getDate() + 1);
+           var newflightdateStr = transform(newflightdate);
+           html +=
+           "    <button type=\"button\" id= '"+i+"-btn"+"'onclick=\"showData(\'"+newflightdateStr+"\')\"  class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+         }
+         $("#flight-date").append(html);
+
+ }
+
+ function transform(date){
+               var year =date.getFullYear();//获取完整的年份(4位,1970-????)
+               var month = date.getMonth() + 1;//获取当前月份(0-11,0代表1月)
+               var day = date.getDate();//获取当前日(1-31)
+               if (month < 10) {
+                    month ="0" + month;
+                }
+               if (day < 10) {
+                    day ="0" + day;
+                }
+
+        var dateString = year +"-" + month + "-" + day;
+
+       return dateString;
+ }
+
+function showData(flightdateStr){
+
+     var segment_id = $("#segment").val();
+     var flight_date = flightdateStr;
+     var price_type = $("input[name='optradio']:checked").val();
+     gloablflightdate = flight_date;
+     globalpricetype = price_type;
+     globalsegmentid = segment_id;
+
+    /* if (segment_id = null || segment_id==""){
+         alert("请选择航段！");
+     }
+     if (flight_date = null || flight_date==""){
+         alert("请选择航班日期！");
+     }
+     if (price_type = null || price_type==""){
+         alert("请选择机票类型！");
+     }*/
+
+
+$("#flightData").jqGrid('setGridParam', {
+
+            url: "{{url_for('main.analysis_overview_query')}}",
+            postData : {segment_id : segment_id,flight_date : flight_date,price_type : price_type}
+
+         }).trigger('reloadGrid');
+
+
+
+
+}
+
+function btn_detail(data){
+     var time_range = data;
+     window.open("{{url_for('main.analysis_custom_index')}}");
+
+}
+
+
 </script>
 {% endblock %}

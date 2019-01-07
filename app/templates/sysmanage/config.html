@@ -84,7 +84,7 @@
         findStatus(); //获取定时开关状态
 
 
-        $("#time :radio").click(function () { //变更抓取周期
+         $("#time :radio").click(function () { //变更抓取周期
             var a = $("#time input[type=radio]:checked").val();
             $.ajax({
                 url: "{{url_for('sysmanage.reload_interval')}}",
