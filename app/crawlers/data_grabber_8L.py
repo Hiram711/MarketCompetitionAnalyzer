@@ -95,6 +95,9 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
     if '很抱歉，您所查询的航班暂无数据' in flight_list[0].get_text():
         return result
 
+    if 'display: none' not in soup.find(id='isAllUniflightDiv').attrs['style']:
+        return result
+
     for flight in flight_list:
         dep_date = flight.attrs['deptime']
         arv_date = flight.attrs['arrtime']
@@ -135,7 +138,7 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
 
 
 if __name__ == '__main__':
-    rs = data_grabber_8l('昆明', '成都', '2018-12-23', headless=False)
+    rs = data_grabber_8l('昆明', '成都', '2019-01-02', headless=False)
     print(rs)
     for i in rs:
         print(i)
