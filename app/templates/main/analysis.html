@@ -89,7 +89,86 @@
 <script src="{{url_for('static', filename='js/datetimepicker/bootstrap-datetimepicker.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/datetimepicker/bootstrap-datetimepicker.zh-CN.js')}}"></script>
 <script>
+    var gloablflightdate = "";
+     var globalpricetype = "";
+      var globalsegmentid = "";
  $(document).ready(function () {
+
+     $("#flightData").jqGrid({
+            styleUI: 'Bootstrap4',
+            iconSet: "Octicons",
+            responsive: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 10,
+            rowList: [10, 20, 30],
+            height: "100%",
+            //height: 300,
+            autowidth: true,
+            pager: '#gridpager',
+            sortname: 'id',
+            sortorder: "asc",
+            viewrecords: true,
+            caption: "数据分析比对",
+            datatype: "json",
+            mtype: 'GET',
+            colModel:
+                [
+                    {label: '时刻', name: 'segment_id', index: 'segment_id', align: 'center', editable: true, search: true},
+                    {label: '时刻分组', name: 'time_range', index: 'time_range', align: 'center', editable: true, search: true},
+                    {label: '航段', name: 'segment', index: 'segment', align: 'center', editable: true, search: true},
+                    {label: '祥鹏航班时刻 ', name: '8L_time', index: '8L_time', align: 'center', editable: true, search: true,
+                        formatter: function (cellvalue) {
+                             if(cellvalue =="" || cellvalue == null){
+                                 return "-";
+                             }else{
+                                 return cellvalue;
+                             }
+                        }
+                    },
+                    {label: '祥鹏航班号 ', name: '8L_flt', index: 'flt_cnt', align: 'center', editable: true, search: true,
+                    formatter: function (cellvalue) {
+                             if(cellvalue =="" || cellvalue == null){
+                                 return "-";
+                             }else{
+                                 return cellvalue;
+                             }
+                        }
+                        },
+                    {label: '祥鹏票价', name: '8L_price', index: '8L_price', align: 'center', editable: true, search: true,
+                    formatter: function (cellvalue) {
+                             if(cellvalue =="" || cellvalue == null){
+                                 return "-";
+                             }else{
+                                 return cellvalue;
+                             }
+                        }
+                    },
+                    {label: '市场最低票价', name: 'mkt_min', index: 'mkt_min', align: 'center', editable: true, search: true},
+                    {label: '市场最高票价', name: 'mkt_max', index: 'mkt_max', align: 'center', editable: true, search: true},
+                    {label: '竞争航班总数', name: 'company_cnt', index: 'company_cnt', align: 'center', editable: true, search: true},
+                    {
+                    label: '详情', name: 'operate', index: 'operate',  align: 'center',
+                    formatter: function (cellvalue, options, rowObject) {
+                        var datas = new Array();
+                        var detail="<button onclick='btn_detail(\""+ rowObject.time_range+ "\")''   class=\"btn btn-success\"  >详情</buttom>";
+                        return detail;
+                    },
+                },
+                ],
+            jsonReader: {
+                root: "data", // json中代表实际模型数据的入口
+                records: "total", // json中代表数据行总数的数据
+                page: "page", // json中代表当前页码的数据
+                total: "pages", // json中代表页码总数的数据
+                repeatitems: false
+            }
+        });
+        $("#flightData").navGrid('#gridpager', {edit: false, add: true, del: false}, {}, {}, {}, {
+            sopt: ['eq'],
+            multipleSearch: true
+        });
+
      $("#blrz-entry-date-start").datetimepicker({//选择年月日
          format: 'yyyy-mm-dd',
          language: 'zh-CN',
@@ -164,7 +243,7 @@
            newflightdate.setDate(flightdate.getDate() + 1);
            var newflightdateStr = transform(newflightdate);
            html +=
-            "    <button type=\"button\" id= '"+i+"-btn"+"'   class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+           "    <button type=\"button\" id= '"+i+"-btn"+"'onclick=\"showData(\'"+newflightdateStr+"\')\"  class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
          }
          $("#flight-date").append(html);
 
@@ -181,18 +260,26 @@
            newflightdate.setDate(flightdate.getDate() + 1);
            var newflightdateStr = transform(newflightdate);
            html +=
-            "    <button type=\"button\" id= '"+i+"-btn"+"'   class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
+           "    <button type=\"button\" id= '"+i+"-btn"+"'onclick=\"showData(\'"+newflightdateStr+"\')\"  class=\"btn btn-primary\">"+newflightdateStr+"</button>\n" ;
          }
          $("#flight-date").append(html);
 
  }
 
  function transform(date){
-     var str = date.getFullYear() + '-'
-    + (parseInt(date.getMonth()) + 1) + '-'
-    + date.getDate();
+               var year =date.getFullYear();//获取完整的年份(4位,1970-????)
+               var month = date.getMonth() + 1;//获取当前月份(0-11,0代表1月)
+               var day = date.getDate();//获取当前日(1-31)
+               if (month < 10) {
+                    month ="0" + month;
+                }
+               if (day < 10) {
+                    day ="0" + day;
+                }
 
-     return str;
+        var dateString = year +"-" + month + "-" + day;
+
+       return dateString;
  }
 
 function showData(flightdateStr){
@@ -200,6 +287,10 @@ function showData(flightdateStr){
      var segment_id = $("#segment").val();
      var flight_date = flightdateStr;
      var price_type = $("input[name='optradio']:checked").val();
+     gloablflightdate = flight_date;
+     globalpricetype = price_type;
+     globalsegmentid = segment_id;
+
     /* if (segment_id = null || segment_id==""){
          alert("请选择航段！");
      }
@@ -211,53 +302,21 @@ function showData(flightdateStr){
      }*/
 
 
-$("#flightData").jqGrid({
-            styleUI: 'Bootstrap4',
-            iconSet: "Octicons",
-            responsive: true,
-            shrinkToFit: true,
-            autoScroll: true,
-            rowNum: 10,
-            rowList: [10, 20, 30],
-            height: "100%",
-            //height: 300,
-            autowidth: true,
-            pager: '#gridpager',
-            sortname: 'id',
-            sortorder: "asc",
-            viewrecords: true,
-            caption: "数据分析比对",
+$("#flightData").jqGrid('setGridParam', {
+
             url: "{{url_for('main.analysis_overview_query')}}",
-            postData : {segment_id : segment_id,flight_date : flight_date,price_type : price_type},
-            datatype: "json",
-            mtype: 'GET',
-            colModel:
-                [
-                    {label: '序号', name: 'segment_id', index: 'segment_id', key: false, align: 'center', editable: false, search: false},
-                    {label: '时刻分组', name: 'time_range', index: 'time_range', align: 'center', editable: true, search: true},
-                     {label: '航段', name: 'segment', index: 'segment', align: 'center', editable: true, search: true},
-                    {label: '祥鹏航班时刻 ', name: '8L_time', index: '8L_time', align: 'center', editable: true, search: true},
-                    {label: '祥鹏航班号 ', name: 'flt_cnt', index: 'flt_cnt', align: 'center', editable: true, search: true},
-                    {label: '祥鹏票价', name: '8L_price', index: '8L_price', align: 'center', editable: true, search: true},
-                    {label: '市场最低票价', name: 'mkt_min', index: 'mkt_min', align: 'center', editable: true, search: true},
-                    {label: '市场最高票价', name: 'mkt_max', index: 'mkt_max', align: 'center', editable: true, search: true},
-                    {label: '竞争航班总数', name: 'arv_city', index: 'arv_city', align: 'center', editable: true, search: true},
-                    {label: '祥鹏票价排名', name: '8L_flt', index: '8L_flt', align: 'center', editable: true, search: true}
-                ],
-            jsonReader: {
-                root: "segments", // json中代表实际模型数据的入口
-                records: "total", // json中代表数据行总数的数据
-                page: "page", // json中代表当前页码的数据
-                total: "pages", // json中代表页码总数的数据
-                repeatitems: false
-            }
-        });
-        $("#flightData").navGrid('#gridpager', {edit: false, add: true, del: false}, {}, {}, {}, {
-            sopt: ['eq'],
-            multipleSearch: true
-        });
+            postData : {segment_id : segment_id,flight_date : flight_date,price_type : price_type}
+
+         }).trigger('reloadGrid');
 
 
+
+
+}
+
+function btn_detail(data){
+     var time_range = data;
+     window.open("{{url_for('main.analysis_custom_index')}}");
 
 }
 
