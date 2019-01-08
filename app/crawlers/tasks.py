@@ -294,7 +294,7 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
                                                            Base.classes.prices
 
         session = Session(engine)
-        company = session.query(Company).filter_by(prefix='KY').first()
+        company = session.query(Company).filter_by(prefix='CZ').first()
         segments = session.query(Segment).all()
         begin_date = datetime.now()
         for segment in segments:
@@ -333,10 +333,10 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
                             dt.flight_date = (begin_date + timedelta(days=i)).date()
                             dt.airplane_type = row['airplane_type']
                             dt.flight_time = row['flt_tm']
-                            if row['is_direct'] == '经停':
-                                dt.is_direct = False
-                            elif row['is_direct'] == '直飞':
+                            if row['is_direct'] == '直飞':
                                 dt.is_direct = True
+                            else:
+                                dt.is_direct = False
                             dt.transfer_city = row['mid']
                             if row['is_shared'] == '共享':
                                 dt.is_shared = True
@@ -345,7 +345,9 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
                             # price detail
                             dt.price_type1 = subrow[0]
                             dt.price_type2 = subrow[1]
-                            dt.discount = float(subrow[2])/10
+                            # 折扣
+                            if subrow[2] != '':
+                                dt.discount = float(subrow[2])/10
                             dt.price = subrow[3]
 
                             session.add(dt)
@@ -369,5 +371,5 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
 
 if __name__ == '__main__':
     task_KY(db_url=os.getenv('DATABASE_URI'), add_days=1)
-    print(os.getenv('DATABASE_URI'))
+    # print(os.getenv('DATABASE_URI'))
 

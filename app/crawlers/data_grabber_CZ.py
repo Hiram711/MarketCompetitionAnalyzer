@@ -113,7 +113,7 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
         for i, flt in enumerate(l_flt):
             # summary title
             company = '南方航空'
-            fltno = re.findall(r'[A-Z]{2}[0-9]+', flt.find(class_='zls-flgno-info').text)[0]
+            fltno = re.findall(r'[A-Z]{2}[0-9]{4}', flt.find(class_='zls-flgno-info').text)[0]
 
             # share info
             share_str = flt.find(class_='zls-flgno-info').span
@@ -136,17 +136,17 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
             is_direct = '直飞'
             # 经停
             if mid_str is not None and '经停' in mid_str.text:
-                mid = re.findall(r'([^：]+)$', mid_str.text)[0].replace(' ', '')
+                mid = mid_str.text.replace(' ', '')  # re.findall(r'([^：]+)$', mid_str.text)[0].replace(' ', '')
                 is_direct = re.findall(r'[^\x00-\xff]{2}', mid_str.text)[0]
-            # 中转
-            if mid_str is not None:
+            elif mid_str is not None:
                 is_direct = flt.find(class_='transicon tooltip-trigger').text.replace(' ', '')
-                mid = mid_str.text.replace(' ', '')  # 中转城市
+                mid = '中转：'+mid_str.text.replace(' ', '')  # 中转城市
 
             arrv = flt.find_all(class_='zls-flplace')[1].text.strip()
             arvTime = re.findall(r'[0-9]{2}[:][0-9]{2}', flt.find_all(class_='zls-flgtime-arr')[0].text.strip())[0]
             # 飞行时间
-            flt_tm = flt.find(class_='zls-flg-time').text.replace('h', '小时').replace('m', '分钟')
+            flt_tm = flt.find(class_='zls-flg-time').text.replace('h', '小时').replace('m', '分钟').\
+                replace('H', '小时').replace('M', '分钟')
             airplane_type = flt.find(class_='zls-flgplane').text.strip()
 
             # price detail
@@ -159,20 +159,25 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
 
                 # click price detail
                 action = ActionChains(driver)
-                detail_label = driver.find_elements_by_class_name('zls-cabin-cell')[j]
+                detail_label = driver.find_elements_by_class_name('zls-flight-cell')[i].\
+                    find_elements_by_class_name('zls-cabin-cell')[j]
                 action.move_to_element(detail_label).click(detail_label).perform()
 
                 # get the detail text
                 price_soup = BeautifulSoup(driver.page_source, 'html5lib')
-                price_list_htm = price_soup.find_all(class_='zls-price-cell')
+                price_list_htm = price_soup.find_all(class_='zls-flight-cell')[i].find_all(class_='zls-price-cell')
                 for price_row in price_list_htm:
                     price_class1 = str(j)+price_row.find(class_='cabin-name').text  # j：0头等舱，1公务舱，2明珠经济舱,3经济舱
                     price_class = price_row.find(class_='cabin-other').find_all('li')[0].text.replace(' ', '')
-                    discount = price_row.find(class_='cabin-other').find_all('li')[1].text.replace('折', '').\
-                        replace(' ', '')
-                    if discount == '全价':
+                    discount = price_row.find(class_='cabin-other').find_all('li')[1].text.replace(' ', '')
+                    if '全价' in discount:
                         discount = 10
-                    price_info = price_row.find(class_='cabin-price-info').text.replace('¥', '')
+                    elif '折' in discount:
+                        discount = discount.replace('折', '')
+                    else:
+                        discount = ''
+                    price_str = price_row.find(class_='cabin-price-info').text.replace('¥', '')
+                    price_info = re.findall(r'[0-9]{1,}[.]{0,1}[0-9]*', price_str)[0]
 
                     price_list.append((price_class1, price_class, discount, price_info))
                     # print('-------price_list----:', price_list)
@@ -186,12 +191,12 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
     except Exception as e:
         print('grab fail:', e)
     finally:
-        # driver.quit()  # make sure the webdriver closed after use
+        driver.quit()  # make sure the webdriver closed after use
         return result
 
 
 if __name__ == '__main__':
-    result = data_grabber_cz('昆明', '成都', '2019-01-15')
+    result = data_grabber_cz('昆明', '西双版纳', '2019-01-15')
     print('get result')
     for i in result:
         print(i)
