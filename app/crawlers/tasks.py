@@ -299,7 +299,7 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
         begin_date = datetime.now()
         for segment in segments:
             for i in range(add_days):
-                query_date = (begin_date + timedelta(days=2)).strftime('%Y-%m-%d')
+                query_date = (begin_date + timedelta(days=i)).strftime('%Y-%m-%d')
                 proxy = None
                 if use_proxy:
                     proxy = get_rnd_proxy()
