@@ -27,7 +27,7 @@ def save(filename, contents):
 
 
 def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chromedriver_win32\chromedriver.exe',
-                    headless=False):
+                    headless=True):
     # define the driver
     options = Options()
     options.headless = headless
