@@ -3,7 +3,6 @@
 __author__ = 'Hiram Zhang'
 
 import re
-import os
 from datetime import datetime, timedelta
 
 from sqlalchemy import create_engine, MetaData
@@ -11,9 +10,9 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 
 from app.crawlers.data_grabber_8L import data_grabber_8l
-from app.crawlers.data_grabber_MU import data_grabber_mu
-from app.crawlers.data_grabber_KY import data_grabber_ky
 from app.crawlers.data_grabber_CZ import data_grabber_cz
+from app.crawlers.data_grabber_KY import data_grabber_ky
+from app.crawlers.data_grabber_MU import data_grabber_mu
 from app.utils import get_rnd_proxy
 
 
@@ -258,7 +257,7 @@ def task_KY(db_url, add_days=7, use_proxy=False):
                             # price detail
                             dt.price_type1 = subrow[0]
                             dt.price_type2 = subrow[1]
-                            dt.discount = int(subrow[2])/100
+                            dt.discount = int(subrow[2]) / 100
                             dt.price = subrow[3]
 
                             session.add(dt)
@@ -347,7 +346,7 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
                             dt.price_type2 = subrow[1]
                             # 折扣
                             if subrow[2] != '':
-                                dt.discount = float(subrow[2])/10
+                                dt.discount = float(subrow[2]) / 10
                             dt.price = subrow[3]
 
                             session.add(dt)
@@ -358,7 +357,6 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
                     log.details = str(e)
                     log.status = 'Failed'
                     print('failed:', e)
-                    print('result:', result)
                 finally:
                     log.end_date = datetime.now()
                 session.add(log)
@@ -370,6 +368,6 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
 
 
 if __name__ == '__main__':
-    task_KY(db_url=os.getenv('DATABASE_URI'), add_days=1)
+    # task_KY(db_url=os.getenv('DATABASE_URI'), add_days=1)
     # print(os.getenv('DATABASE_URI'))
-
+    task_CZ('mysql+pymysql://mktc_user:$[1f*b3z)S@10.42.1.76:6612/mktc?charset=utf8', 1)

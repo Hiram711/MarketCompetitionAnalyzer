@@ -2,6 +2,9 @@
 # -*- coding:utf-8 -*-
 __author__ = 'bill'
 
+import re
+import time
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -10,8 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-import time
-import re
 
 '''
 we use the following codes to try our best to imitate a normal visit
@@ -27,7 +28,7 @@ def save(filename, contents):
 
 
 def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chromedriver_win32\chromedriver.exe',
-                    headless=False):
+                    headless=True):
     # define the driver
     options = Options()
     options.headless = headless
@@ -196,7 +197,7 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
 
 
 if __name__ == '__main__':
-    result = data_grabber_cz('昆明', '西双版纳', '2019-01-15')
+    result = data_grabber_cz('昆明', '成都', '2019-01-15', headless=True)
     print('get result')
     for i in result:
         print(i)
