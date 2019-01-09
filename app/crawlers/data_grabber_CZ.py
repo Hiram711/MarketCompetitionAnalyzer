@@ -72,7 +72,7 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
         print(js)
         driver.execute_script(js)
         time.sleep(1)
-        print("--------dep_date--------", dep_date.get_attribute('value'))
+        # print("--------dep_date--------", dep_date.get_attribute('value'))
         action2.move_by_offset(1, 1).click()
 
         # click blank to close leaveDate form
