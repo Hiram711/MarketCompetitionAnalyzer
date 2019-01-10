@@ -169,6 +169,7 @@ def analysis_detail_query():
             l.append(dict(zip(col_l1, i.split('|'))))
         row = dict(zip(col_l2, row[:15]))
         row['price_info'] = l
+        row['flight_date'] = datetime.strftime(row['flight_date'], '%Y-%m-%d')
         rs_data_list['data'].append(row)
     rs_data_list['total'] = rs_data_list['data'].__len__()
     return jsonify(rs_data_list), 200
