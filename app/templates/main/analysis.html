@@ -23,6 +23,22 @@
     text-align:center;
     padding-left: 60px;
 }
+ .card{
+     width:40%;
+     margin:3%;
+ }
+    .card-info{
+        padding: 0px;
+        font-size: 5px;
+        font-weight: bold;
+    }
+ .card-info-strong{
+        padding: 0px;
+        font-size: 10px;
+        padding-left:15px ;
+        font-weight: bold;
+        color:#66FF99!important;
+    }
 </style>
 <h4>数据分析</h4>
 <HR>
@@ -76,6 +92,58 @@
         <div id="gridpager"></div>
     </div>
 </div>
+
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <!-- 模态框头部 -->
+        <div class="modal-header">
+          <h4 class="modal-title">航班详情</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- 模态框主体 -->
+        <div class="modal-body">
+          <div class="row card-content" id  =" detail">
+
+
+         <div class="card bg-info text-white">
+          <div class="card-header">头部</div>
+            <div class="card-body">内容</div>
+              <div class="card-footer">底部</div>
+            </div>
+
+
+                <div class="card bg-info text-white">
+          <div class="card-header">头部</div>
+            <div class="card-body">内容</div>
+              <div class="card-footer">底部</div>
+            </div>
+
+                <div class="card bg-info text-white">
+          <div class="card-header">头部</div>
+            <div class="card-body">内容</div>
+              <div class="card-footer">底部</div>
+            </div>
+
+                <div class="card bg-info text-white">
+          <div class="card-header">头部</div>
+            <div class="card-body">内容</div>
+              <div class="card-footer">底部</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 模态框底部 -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
 
 {% endblock %}
@@ -315,9 +383,98 @@ $("#flightData").jqGrid('setGridParam', {
 }
 
 function btn_detail(data){
+     $(".card-content").empty();
      var time_range = data;
-     window.open("{{url_for('main.analysis_custom_index')}}");
+     $.ajax({
+                url: "{{url_for('main.analysis_detail_query')}}",
+                data: {
+                       time_range:time_range,
+                        flight_date: gloablflightdate,
+                        price_type:globalpricetype,
+                       segment_id:globalsegmentid
+                },
+                dataType: "json",
+                type: "GET",
+                success: function (res) {
+                    if (res != null && res != "") {
+                       var data = res.data;
+                       var html = "";
 
+                       for(var i=0; i<data.length;i++){
+                           var pricehtml = "";
+                           pricehtml = "<div class=\"card-body\"> 价格详情：<br>";
+                           var subdata = data[i].price_info;
+                           for(var j = 0;j<subdata.length;j++){
+                               if(subdata[j].discount == undefined){
+                                          pricehtml +=
+                           "<label class=\'card-info\' >"+(j+1)+"、"+"类型："+ subdata[j].price_class2+
+                             "                 价格："+  subdata[j].price_value + " 元</label>";
+                               }else{
+                                      pricehtml +=
+                           "<label class=\'card-info\' >"+(j+1)+"、"+
+                                        "类型："+ subdata[j].price_class2+"-"+subdata[j].discount+"折  "+
+                                          "价格："+ subdata[j].price_value+" 元</label>";
+                               }
+
+
+                           }
+                           pricehtml +="</br></div>";
+                           if(data[i].is_direct == "1"){
+
+                                html += "         <div class=\"card bg-info text-white\">" +
+                               "          <div class=\"card-header\">"+"<strong style=\'float: left\'>"+data[i].company_name+"</strong>"+"<strong style=\'float: right\'>"+data[i].flight_no+"</strong>"+"</div>\n" +
+                               "            <div class=\"card-body\">航班信息："+
+                                 "<label class = \"row card-info-strong\" ></label><label class = \"row card-info-strong\" >"+"航段："+ data[i].segment+"</label><label class = \" row card-info-strong\" >"+
+                                        "起飞时间："+ data[i].dep_time+ "</label><label class = \" row card-info-strong\" >"+
+                                          "飞行时间："+ data[i].flight_time+"</label><label class = \"row card-info-strong\" >"+
+                                           "航班日期："+ data[i].flight_date+
+
+                               "</label>"
+
+
+                               +"</div>"
+                               + pricehtml+
+                               "</div>";
+
+                           }else{
+
+                                html += "         <div class=\"card bg-info text-white\">" +
+                               "          <div class=\"card-header\">"+"<strong style=\'float: left\'>"+data[i].company_name+"</strong>"+"<strong style=\'float: right\'>"+data[i].flight_no+"</strong>"+"</div>\n" +
+                               "            <div class=\"card-body\">航班信息："+
+                                 "<label class = \"row card-info-strong\" ></label><label class = \"row card-info-strong\" >"+"航段："+ data[i].segment+"</label><label class = \" row card-info-strong\" >"+
+                                        "起飞时间："+ data[i].dep_time+ "</label><label class = \" row card-info-strong\" >"+
+                                          "飞行时间："+ data[i].flight_time+"</label><label class = \"row card-info-strong\" >"+
+                                           "航班日期："+ data[i].flight_date+"</label><label class = \" row card-info-strong\" >"+
+                                        "中转："+ data[i].transfer_city+
+                               "</label>"
+
+
+                               +"</div>"
+                               + pricehtml+
+                               "</div>";
+                           }
+
+
+                       }
+                       $(".card-content").append(html);
+                    }
+                },
+                fail: function (err) {
+                    alert("error！");
+                }
+
+            });
+
+     $("#myModal").modal('show');
+
+}
+
+function isempty(data){
+     if(data ==""||data==null){
+         return "-";
+     }else{
+         return data;
+     }
 }
 
 
