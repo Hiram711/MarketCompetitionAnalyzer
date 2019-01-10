@@ -218,7 +218,7 @@
                     {
                     label: '详情', name: 'operate', index: 'operate',  align: 'center',
                     formatter: function (cellvalue, options, rowObject) {
-                        var datas = new Array();
+                        var datas = [];
                         var detail="<button onclick='btn_detail(\""+ rowObject.time_range+ "\")''   class=\"btn btn-success\"  >详情</buttom>";
                         return detail;
                     },
@@ -407,11 +407,11 @@ function btn_detail(data){
                            for(var j = 0;j<subdata.length;j++){
                                if(subdata[j].discount == undefined){
                                           pricehtml +=
-                           "<label class=\'card-info\' >"+(j+1)+"、"+"类型："+ subdata[j].price_class2+
+                                              "<label class=\'row card-info-strong\' >" + (j + 1) + "、" + "类型：" + subdata[j].price_class2 +
                              "                 价格："+  subdata[j].price_value + " 元</label>";
                                }else{
                                       pricehtml +=
-                           "<label class=\'card-info\' >"+(j+1)+"、"+
+                                          "<label class=\'row card-info-strong\' >" + (j + 1) + "、" +
                                         "类型："+ subdata[j].price_class2+"-"+subdata[j].discount+"折  "+
                                           "价格："+ subdata[j].price_value+" 元</label>";
                                }

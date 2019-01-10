@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from app.utils import getPinyin
 
 
-def data_grabber_8l(dept, arv, flight_date, proxy=None,
+def data_grabber_3u(dept, arv, flight_date, proxy=None,
                     executable_path=r'D:\chromedriver_win32\chromedriver.exe',
                     headless=True):
     input_dep_city = dept
@@ -94,9 +94,15 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
     tb_head = wait.until(
         EC.presence_of_element_located((By.CSS_SELECTOR, '.tbh-section')))
 
+    result = []
+    if '组合价' in tb_head.text:
+        return result
+    if '您所查询的航线没有找到适用价格' in driver.page_source:
+        return result
+
     soup = BeautifulSoup(driver.page_source, 'html5lib')
     l_flt = soup.select('.brand-tb .tbd-section')
-    result = []
+
     for flt in l_flt:
         flt_no = flt.select_one('.route-info .flight-code').get_text().strip()
         share_info = flt.select_one('.route-info .air-code .hover-con .hover-con-wrap')
@@ -151,7 +157,6 @@ def data_grabber_8l(dept, arv, flight_date, proxy=None,
 
 
 if __name__ == '__main__':
-    rs = data_grabber_8l('昆明', '成都', '2019-02-10', headless=True)
-    print(rs)
+    rs = data_grabber_3u('北京', '拉萨', '2019-01-10', headless=True)
     for i in rs:
         print(i)
