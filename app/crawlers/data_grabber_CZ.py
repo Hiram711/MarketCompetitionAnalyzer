@@ -137,11 +137,13 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
             is_direct = '直飞'
             # 经停
             if mid_str is not None and '经停' in mid_str.text:
-                mid = mid_str.text.replace(' ', '')  # re.findall(r'([^：]+)$', mid_str.text)[0].replace(' ', '')
+                mid = re.findall(r'([^：]+)$', mid_str.text)[0].replace(' ', '')
                 is_direct = re.findall(r'[^\x00-\xff]{2}', mid_str.text)[0]
-            elif mid_str is not None:
-                is_direct = flt.find(class_='transicon tooltip-trigger').text.replace(' ', '')
+            trans = flt.find(class_='transicon tooltip-trigger')
+            if trans is not None:
+                is_direct = '中转'
                 mid = '中转：'+mid_str.text.replace(' ', '')  # 中转城市
+                continue  # 20190111 如果是中转，本条数据不插入
 
             arrv = flt.find_all(class_='zls-flplace')[1].text.strip()
             arvTime = re.findall(r'[0-9]{2}[:][0-9]{2}', flt.find_all(class_='zls-flgtime-arr')[0].text.strip())[0]
@@ -197,7 +199,7 @@ def data_grabber_cz(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
 
 
 if __name__ == '__main__':
-    result = data_grabber_cz('昆明', '成都', '2019-01-15', headless=True)
+    result = data_grabber_cz('昆明', '西双版纳', '2019-01-15', headless=False)
     print('get result')
     for i in result:
         print(i)
