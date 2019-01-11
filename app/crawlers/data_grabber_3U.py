@@ -157,6 +157,6 @@ def data_grabber_3u(dept, arv, flight_date, proxy=None,
 
 
 if __name__ == '__main__':
-    rs = data_grabber_3u('北京', '拉萨', '2019-01-10', headless=True)
+    rs = data_grabber_3u('北京', '丽江', '2019-01-15', headless=False)
     for i in rs:
         print(i)

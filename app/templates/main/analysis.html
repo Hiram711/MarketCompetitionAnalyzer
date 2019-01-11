@@ -487,12 +487,12 @@
                         for (var j = 0; j < subdata.length; j++) {
                             if (subdata[j].discount == undefined) {
                                 pricehtml +=
-                                    "<label class=\'row card-info-strong\' >" + (j + 1) + "、" + data[i].price_type1 + " " + subdata[j].price_class2 +
+                                    "<label class=\'row card-info-strong\' >" + (j + 1) + "、" + subdata[j].price_class1 + " " + subdata[j].price_class2 +
                                     " " + subdata[j].price_value + "元</label>";
                             } else {
                                 pricehtml +=
                                     "<label class=\'row card-info-strong\' >" + (j + 1) + "、" +
-                                    data[i].price_type1 + " " + subdata[j].price_class2 + " " +
+                                    subdata[j].price_class1 + " " + subdata[j].price_class2 + " " +
                                     subdata[j].price_value + "元" + " " + subdata[j].discount + "折</label>";
                             }
 
@@ -511,8 +511,8 @@
                                 "</label><label class = \" row card-info-strong\" >" +
                                 "起降时间：" + data[i].dep_time + "</label><label class = \" row card-info-strong\" >" +
                                 "飞行时间：" + data[i].flight_time + "</label><label class = \"row card-info-strong\" >" +
-                                "航班日期：" + data[i].flight_date +
-
+                                "航班日期：" + data[i].flight_date + "</label><label class = \"row card-info-strong\" >" +
+                                "数据获取时间：" + data[i].get_time +
                                 "</label>"
 
 

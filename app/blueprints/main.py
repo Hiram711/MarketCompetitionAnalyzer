@@ -123,11 +123,11 @@ def analysis_detail_query():
     share_company,
     share_flight_no,
     price_type1_alias,
-    price_type1,
     max(get_time) AS get_time,
     group_concat(
       CONCAT_WS(
         '|',
+      price_type1,
       price_type2,
       price,
       discount
@@ -154,22 +154,22 @@ def analysis_detail_query():
     is_shared,
     share_company,
     share_flight_no,
-    price_type1_alias,
-    price_type1''' % (segment_id, price_type, flight_date, time_range)
+    price_type1_alias''' % (segment_id, price_type, flight_date, time_range)
 
-    col_l1 = ['price_class2', 'price_value', 'discount']
+    col_l1 = ['price_class1', 'price_class2', 'price_value', 'discount']
     col_l2 = ['segment', 'company_name', 'dep_airport', 'arv_airport', 'flight_no',
               'flight_date', 'dep_time', 'flight_time', 'is_direct', 'transfer_city',
-              'is_shared', 'share_company', 'share_flight_no', 'price_type', 'price_type1', 'get_time']
+              'is_shared', 'share_company', 'share_flight_no', 'price_type', 'get_time']
     rs_data = db.session.execute(sql).fetchall()
     rs_data_list = {'data': [], 'total': 0}
     for row in rs_data:
         l = []
-        for i in row[16].split(','):
+        for i in row[15].split(','):
             l.append(dict(zip(col_l1, i.split('|'))))
         row = dict(zip(col_l2, row[:15]))
         row['price_info'] = l
         row['flight_date'] = datetime.strftime(row['flight_date'], '%Y-%m-%d')
+        row['get_time'] = datetime.strftime(row['get_time'], '%Y-%m-%d %H:%M:%S')
         rs_data_list['data'].append(row)
     rs_data_list['total'] = rs_data_list['data'].__len__()
     return jsonify(rs_data_list), 200

@@ -120,6 +120,6 @@ def data_grabber_mu(dept, arv, flight_date, proxy=None, executable_path=r'D:\chr
 
 
 if __name__ == '__main__':
-    result = data_grabber_mu('昆明', '上海', '2018-11-13')
+    result = data_grabber_mu('昆明', '上海', '2019-01-13', headless=False)
     for i in result:
         print(i)
