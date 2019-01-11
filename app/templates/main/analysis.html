@@ -37,8 +37,10 @@
         font-size: 10px;
         padding-left:15px ;
         font-weight: bold;
-        color:#66FF99!important;
     }
+ .grid-table{
+        padding-top:30px;
+ }
 </style>
 <h4>数据分析</h4>
 <HR>
@@ -87,7 +89,7 @@
 </div>
 
 <div class="row">
-    <div class="col-md-10 offset-md-1">
+    <div class="col-md-10 offset-md-1  grid-table">
         <table id="flightData"></table>
         <div id="gridpager"></div>
     </div>
@@ -407,11 +409,11 @@ function btn_detail(data){
                            for(var j = 0;j<subdata.length;j++){
                                if(subdata[j].discount == undefined){
                                           pricehtml +=
-                           "<label class=\'card-info\' >"+(j+1)+"、"+"类型："+ subdata[j].price_class2+
+                           "<label class=\'row card-info-strong\' >"+(j+1)+"、"+"类型："+ subdata[j].price_class2+
                              "                 价格："+  subdata[j].price_value + " 元</label>";
                                }else{
                                       pricehtml +=
-                           "<label class=\'card-info\' >"+(j+1)+"、"+
+                           "<label class=\'row card-info-strong\' >"+(j+1)+"、"+
                                         "类型："+ subdata[j].price_class2+"-"+subdata[j].discount+"折  "+
                                           "价格："+ subdata[j].price_value+" 元</label>";
                                }
