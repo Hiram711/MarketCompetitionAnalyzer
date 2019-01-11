@@ -442,7 +442,12 @@
                 type: "POST",
                 success: function (res) {
                     if (res != null && res != "") { // 注册成功
-                          if(res.status == "running"){alert("运行成功!");};
+                        if (res.status == "running") {
+                            alert("运行成功!");
+                        }
+                        if (res.status == "block") {
+                            alert("已经有任务在运行，请稍后再试。!");
+                        }
                     }
                 },
                 fail: function (err) {

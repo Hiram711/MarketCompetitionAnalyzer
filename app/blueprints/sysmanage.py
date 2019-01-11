@@ -14,8 +14,7 @@ from sqlalchemy import text
 from app.extensions.flaskapscheduler import scheduler
 from app.extensions.flasksqlalchemy import db
 from app.models.auth import User, Permission, Role
-from app.models.cralwer import Company, Option
-from app.models.cralwer import Segment
+from app.models.cralwer import Company, Option, Segment, CrawlerLog
 
 sysmanage_bp = Blueprint('sysmanage', __name__)
 
@@ -318,6 +317,8 @@ def start_job():
         return jsonify(message='Login or privileges required.'), 403
     id = request.values.get('id', type=int)
     company = Company.query.get(id)
+    if CrawlerLog.query.filter_by(company=company, status='Running').count() > 0:
+        return jsonify(dict(job_id=id, status='block')), 200
     option_use_proxy = True if Option.query.filter_by(name='use_proxy').first().value == 1 else False
     option_crawler_days = Option.query.filter_by(name='crawler_days').first().value
     thr = Thread(target=company.crawler_func,
