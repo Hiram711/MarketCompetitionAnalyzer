@@ -7,7 +7,7 @@ import sys
 
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
-from app.crawlers.tasks import task_MU, task_8L, task_KY, task_CZ
+from app.crawlers.tasks import task_MU, task_8L, task_KY, task_CZ, task_3U
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -36,11 +36,13 @@ class BaseConfig:
     CRAWLER_COMPANY = {'东方航空': 'MU',  # set companies
                        '祥鹏航空': '8L',
                        '昆明航空': 'KY',
-                       '南方航空': 'CZ'}
+                       '南方航空': 'CZ',
+                       '四川航空': '3U'}
     CRAWLER_FUNCS = {'MU': task_MU,
                      '8L': task_8L,
                      'KY': task_KY,
-                     'CZ': task_CZ
+                     'CZ': task_CZ,
+                     '3U': task_3U
                      }  # set different func for different company
 
     JOBS = []

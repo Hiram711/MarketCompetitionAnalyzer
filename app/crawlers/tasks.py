@@ -9,6 +9,7 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 
+from app.crawlers.data_grabber_3U import data_grabber_3u
 from app.crawlers.data_grabber_8L import data_grabber_8l
 from app.crawlers.data_grabber_CZ import data_grabber_cz
 from app.crawlers.data_grabber_KY import data_grabber_ky
@@ -367,7 +368,80 @@ def task_CZ(db_url, add_days=7, use_proxy=False):
         session.close()
 
 
+def task_3U(db_url, add_days=7, use_proxy=False):
+    try:
+        # create a new data connection using reflection,
+        # in this way we can avoid using app context and the fun can run independently
+        engine = create_engine(db_url)
+        metadata = MetaData()
+        metadata.reflect(engine, only=['crawler_logs', 'companies', 'segments', 'price_details', 'prices'])
+        Base = automap_base(metadata=metadata)
+        Base.prepare()
+        CrawlerLog, Company, Segment, PriceDetail, Price = Base.classes.crawler_logs, Base.classes.companies, \
+                                                           Base.classes.segments, Base.classes.price_details, \
+                                                           Base.classes.prices
+
+        session = Session(engine)
+        company = session.query(Company).filter_by(prefix='3U').first()
+        segments = session.query(Segment).all()
+        begin_date = datetime.now()
+        for segment in segments:
+            for i in range(add_days):
+                query_date = (begin_date + timedelta(days=i)).strftime('%Y-%m-%d')
+                proxy = None
+                if use_proxy:
+                    proxy = get_rnd_proxy()
+                log = CrawlerLog()
+                log.status = 'Running'
+                log.company_id = company.id
+                log.segment_id = segment.id
+                get_time = datetime.now()
+                log.begin_date = get_time
+                log.flight_date = (begin_date + timedelta(days=i)).date()
+                session.add(log)
+                session.commit()
+                log = session.query(CrawlerLog).get(log.id)
+                try:
+                    result = data_grabber_3u(segment.dep_city, segment.arv_city, flight_date=query_date, proxy=proxy)
+
+                    for row in result:
+                        dt = PriceDetail()
+                        dt.get_time = get_time
+                        dt.company_id = company.id
+                        dt.segment_id = segment.id
+                        dt.get_time = get_time
+                        dt.company_id = company.id
+                        dt.segment_id = segment.id
+                        dt.dep_time = row['dep_time']
+                        dt.dep_airport = row['dep_airport']
+                        dt.arv_time = row['arv_time']
+                        dt.arv_airport = row['arv_airport']
+                        dt.flight_no = row['flt_no'].strip()
+                        dt.flight_date = (begin_date + timedelta(days=i)).date()
+                        dt.airplane_type = row['airplane_type']
+                        dt.flight_time = row['flt_time']
+                        dt.is_direct = row['is_direct']
+                        dt.transfer_city = row['transfer_city']
+                        dt.price_type1 = row['price_type1']
+                        dt.price_type2 = row['price_type2']
+                        dt.price = float(row['price_value'])
+                        session.add(dt)
+                        session.commit()
+                    log.status = 'Success'
+                    log.rowcnt = len(result)
+                except Exception as e:
+                    log.details = str(e)
+                    log.status = 'Failed'
+                finally:
+                    log.end_date = datetime.now()
+                session.add(log)
+                session.commit()
+    except Exception as e:
+        print(e)
+    finally:
+        session.close()
+
 if __name__ == '__main__':
     # task_KY(db_url=os.getenv('DATABASE_URI'), add_days=1)
     # print(os.getenv('DATABASE_URI'))
-    task_CZ('mysql+pymysql://mktc_user:$[1f*b3z)S@10.42.1.76:6612/mktc?charset=utf8', 1)
+    task_3U('mysql+pymysql://mktc_user:$[1f*b3z)S@10.42.1.76:6612/mktc?charset=utf8', 1)
