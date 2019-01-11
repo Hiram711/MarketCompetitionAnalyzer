@@ -77,7 +77,7 @@
             sortname: 'id',
             sortorder: "asc",
             viewrecords: true,
-            caption: "爬虫运行日志",
+            caption: "数据抓取日志",
             url: "{{url_for('main.crawler_logs')}}",
             datatype: "json",
             mtype: 'GET',
@@ -234,7 +234,7 @@
 
         reloadCharts();
 
-        window.setInterval(reloadData, 3000);
+        window.setInterval(reloadData, 10000);//10秒刷新一次
 
         function reloadData() {
             $("#grid").trigger("reloadGrid");
