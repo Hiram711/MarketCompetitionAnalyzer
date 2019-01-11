@@ -191,24 +191,27 @@
                     name: 'time_range',
                     index: 'time_range',
                     align: 'center',
-                    editable: true,
-                    search: true
+                    editable: false,
+                    search: false,
+                    sortable: false
                 },
                 {
                     label: '航段',
                     name: 'segment',
                     index: 'segment',
                     align: 'center',
-                    editable: true,
-                    search: true
+                    editable: false,
+                    search: false,
+                    sortable: false
                 },
                 {
                     label: '祥鹏航班时刻 ',
                     name: '8L_time',
                     index: '8L_time',
                     align: 'center',
-                    editable: true,
-                    search: true,
+                    editable: false,
+                    search: false,
+                    sortable: false,
                     formatter: function (cellvalue) {
                         if (cellvalue == "" || cellvalue == null) {
                             return "-";
@@ -222,8 +225,9 @@
                     name: '8L_flt',
                     index: 'flt_cnt',
                     align: 'center',
-                    editable: true,
-                    search: true,
+                    editable: false,
+                    search: false,
+                    sortable: false,
                     formatter: function (cellvalue) {
                         if (cellvalue == "" || cellvalue == null) {
                             return "-";
@@ -237,8 +241,9 @@
                     name: '8L_price',
                     index: '8L_price',
                     align: 'center',
-                    editable: true,
-                    search: true,
+                    editable: false,
+                    search: false,
+                    sortable: false,
                     formatter: function (cellvalue) {
                         if (cellvalue == "" || cellvalue == null) {
                             return "-";
@@ -252,32 +257,36 @@
                     name: 'mkt_min',
                     index: 'mkt_min',
                     align: 'center',
-                    editable: true,
-                    search: true
+                    editable: false,
+                    search: false,
+                    sortable: false
                 },
                 {
                     label: '市场最高票价',
                     name: 'mkt_max',
                     index: 'mkt_max',
                     align: 'center',
-                    editable: true,
-                    search: true
+                    editable: false,
+                    search: false,
+                    sortable: false
                 },
                 {
                     label: '竞争航班总数',
                     name: 'flt_cnt',
                     index: 'flt_cnt',
                     align: 'center',
-                    editable: true,
-                    search: true
+                    editable: false,
+                    search: false,
+                    sortable: false
                 },
                 {
                     label: '竞争公司总数',
                     name: 'company_cnt',
                     index: 'company_cnt',
                     align: 'center',
-                    editable: true,
-                    search: true
+                    editable: false,
+                    search: false,
+                    sortable: false
                 },
                 {
                     label: '详情',
@@ -530,7 +539,8 @@
                                 "起飞时间：" + data[i].dep_time + "</label><label class = \" row card-info-strong\" >" +
                                 "飞行时间：" + data[i].flight_time + "</label><label class = \"row card-info-strong\" >" +
                                 "航班日期：" + data[i].flight_date + "</label><label class = \" row card-info-strong\" >" +
-                                "经停：" + data[i].transfer_city +
+                                "经停：" + data[i].transfer_city + "</label><label class = \" row card-info-strong\" >" +
+                                "数据获取时间：" + data[i].get_time +
                                 "</label>"
 
 
