@@ -18,15 +18,25 @@
         <label>定时开关:</label>
         <input type="checkbox" class="schedule" id="schedule" checked/>
     </div>
-    <div class="col-sm-2 offset-md-1">
+
+   <!-- <div class="hidden col-sm-2 offset-md-1">
         <label>是否使用代理ip:</label>
         <input type="checkbox" class="agent" id="agent" checked/>
     </div>
+-->
+      <div class = "row col-sm-4">
+        <label  >手动开关：</label>
+        <select class="form-control col-sm-4" placeholder  = "请选择航段" id="company-select">
+        </select>
+          <div class = col-sm-3 >
+            <button type="button"  class="btn btn-success" onclick = "runOnece()">执行</button>
+          </div>
+    </div>
 
-    <div class="col-sm-2 offset-md-1">
+    <!--<div class="hidden col-sm-2 offset-md-1">
         <label>邮件提醒:</label>
         <input type="checkbox" class="mail" id="mail" checked/>
-    </div>
+    </div>-->
 </div>
 
 <HR>
@@ -82,7 +92,7 @@
 
         findInterval(); //获取抓取周期
         findStatus(); //获取定时开关状态
-
+        setSelect();//初始化下拉框
 
          $("#time :radio").click(function () { //变更抓取周期
             var a = $("#time input[type=radio]:checked").val();
@@ -156,7 +166,7 @@
         });
 
 
-        $(".agent").bootstrapSwitch({
+        /*$(".agent").bootstrapSwitch({
             onText: "开", // 设置ON文本  
             offText: "关", // 设置OFF文本  
             onColor: "success", // 设置ON文本颜色     (info/success/warning/danger/primary)  
@@ -171,7 +181,7 @@
                     alert("OFF");
                 }
             }
-        });
+        });*/
 
         $(".mail").bootstrapSwitch({
             onText: "开", // 设置ON文本  
@@ -393,6 +403,53 @@
             }
 
         });
+    }
+
+    function setSelect(){
+         $.ajax({
+                url: "{{url_for('sysmanage.list_company')}}",
+                data: {
+
+                },
+                dataType: "json",
+                type: "GET",
+                success: function (res) {
+                    if (res != null && res != "") { // 注册成功
+                        var html = "";
+                      for (var i = 0;i<res.length;i++){
+                          html += "<option value='" + res[i].id + "'>"+res[i].company_name+"</option>";
+
+                      }
+                      $("#company-select").append(html);
+                    }
+                },
+                fail: function (err) {
+                    alert("error！");
+                }
+
+            });
+    }
+
+    function runOnece(){
+        var id = $("#company-select").val();
+
+         $.ajax({
+                url: "{{url_for('sysmanage.start_job')}}",
+                data: {
+                    id:id
+                },
+                dataType: "json",
+                type: "POST",
+                success: function (res) {
+                    if (res != null && res != "") { // 注册成功
+                          if(res.status == "running"){alert("运行成功!");};
+                    }
+                },
+                fail: function (err) {
+                    alert("error！");
+                }
+
+            });
     }
 </script>
 {% endblock %}

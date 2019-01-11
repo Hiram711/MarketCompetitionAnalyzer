@@ -312,10 +312,11 @@ def list_job():
 
 
 # use this view to start job manually
-@sysmanage_bp.route('/scheduler/start/<int:id>')
-def start_job(id):
+@sysmanage_bp.route('/scheduler/startjob', methods=['POST'])
+def start_job():
     if not (current_user.is_authenticated and current_user.can(Permission.MANAGE_CRAWLER)):
         return jsonify(message='Login or privileges required.'), 403
+    id = request.values.get('id', type=int)
     company = Company.query.get(id)
     option_use_proxy = True if Option.query.filter_by(name='use_proxy').first().value == 1 else False
     option_crawler_days = Option.query.filter_by(name='crawler_days').first().value
