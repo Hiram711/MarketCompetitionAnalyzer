@@ -180,20 +180,12 @@
             //height: 300,
             autowidth: true,
             pager: '#gridpager',
-            sortname: 'id',
-            sortorder: "asc",
+            sortable: false,
             viewrecords: true,
             caption: "数据分析比对",
             datatype: "json",
             mtype: 'GET',
-            colModel: [{
-                label: '时刻',
-                name: 'segment_id',
-                index: 'segment_id',
-                align: 'center',
-                editable: true,
-                search: true
-            },
+            colModel: [
                 {
                     label: '时刻分组',
                     name: 'time_range',
@@ -273,6 +265,14 @@
                 },
                 {
                     label: '竞争航班总数',
+                    name: 'flt_cnt',
+                    index: 'flt_cnt',
+                    align: 'center',
+                    editable: true,
+                    search: true
+                },
+                {
+                    label: '竞争公司总数',
                     name: 'company_cnt',
                     index: 'company_cnt',
                     align: 'center',
@@ -302,12 +302,10 @@
         });
         $("#flightData").navGrid('#gridpager', {
             edit: false,
-            add: true,
-            del: false
-        }, {}, {}, {}, {
-            sopt: ['eq'],
-            multipleSearch: true
-        });
+            add: false,
+            del: false,
+            search: false
+        }, {}, {}, {}, {});
 
         $("#blrz-entry-date-start").datetimepicker({ //选择年月日
             format: 'yyyy-mm-dd',

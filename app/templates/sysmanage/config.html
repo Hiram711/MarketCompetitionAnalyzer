@@ -259,7 +259,8 @@
                 key: false,
                 align: 'center',
                 editable: false,
-                search: false
+                search: false,
+                sortable: false,
             },
                 {
                     label: '公司',
@@ -267,6 +268,7 @@
                     index: 'company_name',
                     align: 'center',
                     editable: false,
+                    sortable: false,
                     search: false
                 },
                 {
@@ -330,7 +332,15 @@
             mtype: 'GET',
             colModel:
                 [
-                    {label: '序号', name: 'id', index: 'id', key: false, align: 'center', editable: false, search: false},
+                    {
+                        label: '序号',
+                        name: 'id',
+                        index: 'id',
+                        key: false,
+                        align: 'center',
+                        editable: false,
+                        search: false,
+                    },
                     {label: '起飞城市', name: 'dep_city', index: 'dep_city', align: 'center', editable: true, search: true},
                     {label: '到达城市', name: 'arv_city', index: 'arv_city', align: 'center', editable: true, search: true},
                     {
@@ -349,7 +359,15 @@
                         editable: false,
                         search: false
                     },
-                    {label: '用户名', name: 'editor', index: 'editor', align: 'center', editable: false, search: false},
+                    {
+                        label: '用户名',
+                        name: 'editor',
+                        index: 'editor',
+                        align: 'center',
+                        editable: false,
+                        search: false,
+                        sortable: false,
+                    },
                     {name: '操作', align: 'center', sortable: false, formatter: 'actions', search: false}
                 ],
             jsonReader: {
